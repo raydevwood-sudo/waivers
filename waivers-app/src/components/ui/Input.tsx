@@ -1,5 +1,22 @@
 import React from 'react';
 
+interface InputProps {
+  id?: string;
+  name?: string;
+  type?: 'text' | 'email' | 'tel' | 'number' | 'password';
+  placeholder?: string;
+  label?: string;
+  value: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  autoComplete?: string;
+  className?: string;
+}
+
 export default function Input({ 
   id,
   name,
@@ -15,7 +32,7 @@ export default function Input({
   maxLength,
   autoComplete,
   className = ''
-}) {
+}: InputProps) {
   return (
     <div className={`w-full ${className}`}>
       {label && (

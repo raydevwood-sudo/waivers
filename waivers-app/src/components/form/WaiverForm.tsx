@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormProgress from './FormProgress';
 import FormNavigation from './FormNavigation';
 import SignatureModal from '../signature/SignatureModal';
@@ -56,7 +56,7 @@ export default function WaiverForm({ onSubmit }) {
     informedConsent5: false,
     
     // Media Release
-    mediaRelease: 'I consent to Cycling Without Age Society using recordings of me participating in their program for the purposes listed above.',
+    mediaRelease: '',
     
     // Signatures
    passengerSignature: blankImage,
@@ -72,6 +72,14 @@ export default function WaiverForm({ onSubmit }) {
   });
 
   const [validationErrors, setValidationErrors] = useState([]);
+
+  // Reset media release when waiver type changes to update pronouns
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      mediaRelease: ''
+    }));
+  }, [waiverType]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -222,7 +230,9 @@ export default function WaiverForm({ onSubmit }) {
         
       case 8: // Signatures
         if (!formData.passengerSignature || formData.passengerSignature === blankImage) {
-          errors.push('Passenger signature is required');
+          errors.push(waiverType === 'representative' 
+            ? 'Legal representative signature is required'
+            : 'Passenger signature is required');
         }
         if (waiverType === 'representative') {
           if (!formData.witnessName.trim()) {

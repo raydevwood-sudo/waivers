@@ -1,5 +1,16 @@
 import React from 'react';
 
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  variant?: ButtonVariant;
+  disabled?: boolean;
+  className?: string;
+}
+
 export default function Button({ 
   children, 
   onClick, 
@@ -7,8 +18,8 @@ export default function Button({
   variant = 'primary',
   disabled = false,
   className = ''
-}) {
-  const variants = {
+}: ButtonProps) {
+  const variants: Record<ButtonVariant, string> = {
     primary: 'bg-primary hover:bg-primary-hover text-white shadow-lg hover:shadow-xl disabled:bg-gray-300',
     secondary: 'bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 disabled:bg-gray-100',
     ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 disabled:text-gray-400'

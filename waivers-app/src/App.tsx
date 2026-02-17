@@ -3,12 +3,13 @@ import Layout from './components/layout/Layout'
 import WaiverForm from './components/form/WaiverForm'
 import SuccessPage from './components/SuccessPage'
 import Loader from './components/ui/Loader'
+import type { FormData } from './types'
 
 function App() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData: FormData): Promise<void> => {
     setIsSubmitting(true)
     try {
       // TODO: Submit to Firebase Function

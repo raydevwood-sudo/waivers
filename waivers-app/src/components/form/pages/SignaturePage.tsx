@@ -1,8 +1,12 @@
 import React from 'react';
 import Input from '../../ui/Input';
 
-export default function SignaturePage({ formData, onInputChange, onOpenSignature }) {
-  const fullName = `${formData.firstName} ${formData.lastName}`;
+export default function SignaturePage({ formData, waiverType, onInputChange, onOpenSignature }) {
+  const isRepresentative = waiverType === 'representative';
+  const passengerFullName = `${formData.firstName} ${formData.lastName}`;
+  const representativeFullName = isRepresentative 
+    ? `${formData.representativeFirstName} ${formData.representativeLastName}`
+    : '';
 
   return (
     <div className="space-y-6">
@@ -18,11 +22,20 @@ export default function SignaturePage({ formData, onInputChange, onOpenSignature
       </div>
       
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Passenger Signature */}
+        {/* Passenger or Legal Representative Signature */}
         <div className="space-y-3">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Passenger Signature</h3>
-            <p className="text-sm text-gray-600">{fullName}</p>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {isRepresentative ? representativeFullName : passengerFullName}
+            </p>
+            {isRepresentative && (
+              <p className="text-sm text-gray-500 italic mt-1">
+                Legal Representative of {passengerFullName}
+              </p>
+            )}
           </div>
           
           <button
@@ -32,7 +45,7 @@ export default function SignaturePage({ formData, onInputChange, onOpenSignature
           >
             <img
               src={formData.passengerSignature}
-              alt="Passenger Signature"
+              alt={isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
               className="w-full h-24 object-contain"
             />
             {!formData.passengerTimestamp && (

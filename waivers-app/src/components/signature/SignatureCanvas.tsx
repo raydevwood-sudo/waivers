@@ -1,9 +1,31 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import SignaturePad from 'signature_pad';
 
-export default function SignatureCanvas({ onSave, signee }) {
-  const canvasRef = useRef(null);
-  const signaturePadRef = useRef(null);
+interface SignatureCanvasProps {
+  onSave: (signatureDataURL: string, timestamp: Date) => void;
+  signeeType?: 'passenger' | 'witness';
+}
+
+export default function SignatureCanvas({ onSave }: SignatureCanvasProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const signaturePadRef = useRef<SignaturePad | null>(null);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(ratio, ratio);
+    }
+
+    if (signaturePadRef.current) {
+      signaturePadRef.current.clear();
+    }
+  }, []);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -22,24 +44,10 @@ export default function SignatureCanvas({ onSave, signee }) {
         signaturePadRef.current.off();
       }
     };
-  }, []);
-
-  const resizeCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext('2d').scale(ratio, ratio);
-
-    if (signaturePadRef.current) {
-      signaturePadRef.current.clear();
-    }
-  };
+  }, [resizeCanvas]);
 
   const handleSave = () => {
-    if (signaturePadRef.current.isEmpty()) {
+    if (!signaturePadRef.current || signaturePadRef.current.isEmpty()) {
       alert('Please sign before saving.');
       return;
     }
