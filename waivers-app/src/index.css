@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --primary: #00d1a2;
+    --primary-hover: #00b890;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-gray-50 text-gray-900;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}

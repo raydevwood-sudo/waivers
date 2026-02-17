@@ -1,0 +1,247 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">  
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" sizes="197x197" href="https://raywood-cwas.github.io/images/favicon.png"/>
+  <?!= include("Styles") ?>
+</head>
+<body>  
+  
+
+  <!-- Signature Modal -->
+  <div class="modal" id="modal">
+    <div class="dialog" id="dialog">
+      <header id="signaturePadHeader">
+        <h2 id="signaturePadTitle"></h2>
+        <button id="closeSignatureButton">&times;</button>
+      </header>
+      <canvas id="canvas"></canvas>
+      <div id="signaturePadFooter">
+        <button id="saveSignatureButton" class="btn btn-primary-filled">Save</button>
+        <button id="clearSignatureButton" class="btn btn-primary-content">Clear</button>
+      </div> 
+    </div>
+  </div>
+
+  <!-- Loader overlay -->
+  <div id="preloader" class="modal">
+    <div id="preloader-img"></div>
+  </div>
+
+  <div class="banner"></div>
+
+  <div class="center-column flex-column">
+
+  <header id="pageHeader" class="flex-row gap-1">
+    <!-- Header Bar and Title -->
+    <img id="headerImage" src="https://raywood-cwas.github.io/images/favicon.png" alt="CWAS logo" width=40px height=40px>
+    <h1 id="appTitle">Passenger Application and Waiver</h1>
+  </header>
+
+  <main class="flex-column">
+      <form id="regForm" action="">
+
+        <div id="formHeader" class="flex-row gap-1">  
+          <!-- Circles which indicates the steps of the form: Use one span to represent each page-->
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+          <span class="step"></span>
+        </div>
+
+        <div class="form-body">
+          <!-- One "tab" for each step in the form: -->
+
+          <!-- Page 1 - Choose the waiver type -->
+          <div class="tab form-tab">
+            <div>
+              <h3>What is your relationship to the passenger that is the subject of this waiver?</h3>
+            </div>
+            <br>
+            <div class="radio-group">
+              <div>
+                <input type="radio" id="passenger-radio" name="waiverType" class="md-checkbox" value="passenger" checked onchange="changeWaiverType('passenger')">
+                <label for="passenger-radio" class="md-checkbox-label">I am the passenger.</label>
+              </div>
+              <br>
+              <div>
+                <input type="radio" id="representative-radio" name="waiverType" class="md-checkbox" value="representative" onchange="changeWaiverType('representative')">
+                <label for="representative-radio" class="md-checkbox-label">I am a legal representative of the passenger(Legal Guardian or Power of Attorney) and authorized to release liability on behalf of the passenger.</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Page 2 -->
+          <div class="tab form-tab">
+            <h3>Passenger</h3>
+
+            <div>
+              <input class="md-input" id="passenger-first-name" placeholder="First name" oninput="validate(this)" type="text" autocomplete="given-name" required>
+              <label class="md-label" for="passenger-first-name">First name</label>
+            </div>
+
+            <div>
+              <input class="md-input" id="passenger-last-name" placeholder="Last name" oninput="validate(this)" type="text" autocomplete="family-name" required>
+              <label class="md-label" for="passenger-last-name">Last name</label>
+            </div>
+
+            <div>
+              <input class="md-input" id="town" placeholder="Place of residence" oninput="validate(this)" type="text" minlength="3" autocomplete="address-level2" required>
+              <label class="md-label" for="town">Town/City</label>
+            </div>
+
+            <h3 class="representative-only">Legal Representative</h3>
+
+            <div class="representative-only">
+              <input class="md-input" id="representative-first-name" placeholder="First name" oninput="validate(this)" type="text" autocomplete="given-name" required>
+              <label class="md-label" for="representative-first-name">First name</label>
+            </div>
+
+            <div class="representative-only">
+              <input class="md-input" id="representative-last-name" placeholder="Last name" oninput="validate(this)" type="text" autocomplete="family-name" required>
+              <label class="md-label" for="representative-last-name">Last name</label>
+            </div>
+
+            <div>
+              <input class="md-input" id="email" placeholder="Email" oninput="validate(this)" type="email" autocomplete="email" required>
+              <label class="md-label" for="email">Email</label>
+            </div>
+
+            <div>
+              <input class="md-input" id="phone" placeholder="Phone" oninput="validate(this)" type="tel" minlength="10" maxlength="10" autocomplete="tel" required>
+              <label class="md-label" for="phone">Phone</label>
+            </div>
+
+          </div>
+          
+          <!-- Page 3 -->
+          <div class="tab waiver-tab passenger-only">
+            <p>I, <u id="waiverFullName"></u>, of the town of <u id="waiverTown"></u>,  have received, read and understand the <a href="#" target="_blank" class="link-primary">Cycling Without Age Passenger Handbook</a> and Confidentiality guidelines, and agree to abide by the procedures listed therein and I attest that all of the information I have provided herein is accurate and complete. I understand and agree that acceptance into the program is entirely at the discretion of the Cycling Without Age Society program coordinator.</p>
+            <div class="waiver-check">
+              <input type="checkbox" id="waiver1" class="md-checkbox" required>
+              <label for="waiver1" class="md-checkbox-label">I agree</label>
+            </div>
+            
+          </div>
+      
+          <!-- Page 4 -->
+          <div class="tab waiver-tab">
+            <p>I, the undersigned, am the person named herein taking part in the Cycling Without Age Program as a passenger.</p>
+            <div class="waiver-check">
+              <input type="checkbox" id="waiver2" class="md-checkbox" required>
+              <label for="waiver2" class="md-checkbox-label">I agree</label>
+            </div>
+          </div>
+      
+          <!-- Page 5 -->
+          <div class="tab waiver-tab">
+            <p>I understand and agree that there are inherent risks associated with participation in this activity, that my participation is voluntary and that I am physically fit enough to participate in the activity.</p>
+            <div class="waiver-check">
+              <input type="checkbox" id="waiver3" class="md-checkbox" required>
+              <label for="waiver3" class="md-checkbox-label">I agree</label>
+            </div>
+          </div>
+      
+          <!-- Page 6 -->
+          <div class="tab waiver-tab">
+            <p>I accept all responsibility for my participation including the possibility of personal injury, death, property damage or any kind notwithstanding that the injury, loss may have been contributed to or occasioned by the negligence of the Cycling Without Age Society and its officers, directors, employed, members, agents, assigns, legal representative and successors.</p>
+            <div class="waiver-check">
+              <input type="checkbox" id="waiver4" class="md-checkbox" required>
+              <label for="waiver4" class="md-checkbox-label">I agree</label>
+            </div>
+          </div>
+      
+          <!-- Page 7 -->
+          <div class="tab waiver-tab">
+            <p>I do hereby indemnify and hold harmless the Cycling Without Age Society, its officers, directors, employees, members, agents, assigns, legal representatives and successors and any and all business associates and partners involved in the above noted activity and each of them, their owner, officers, and employees hereby waiving all claims for damage now or in the future arising from any loss, accident, injury or death which may be caused by or arise from participation of the individual named herein during this event; and agree to assume all risks for the activity noted above that the individual named herein has agreed to participate in.</p>
+            <div class="waiver-check">
+              <input type="checkbox" id="waiver5" class="md-checkbox" required>
+              <label for="waiver5" class="md-checkbox-label">I agree</label>
+            </div>
+          </div>
+
+          <!-- Page 8 -->
+          <div class="tab waiver-tab">
+            <p>I understand that Cycling Without Age Society occasionally takes photos/videos of their rides and passengers for the purpose of promoting their program on digital and print media including social networks, CWAS website, other news and advertising.</p>
+            <div class="radio-group">
+              <div>
+                <input type="radio" id="consent" name="mediaRelease" class="md-checkbox" value="I consent to Cycling Without Age Society using recordings of me participating in their program for the purposes listed above." checked>
+                <label for="consent" class="md-checkbox-label">I consent to Cycling Without Age Society using recordings of me participating in their program for the purposes listed above.
+</label>
+              </div>
+              <div>
+                <input type="radio" id="noConsent" name="mediaRelease" class="md-checkbox" value="I do not consent. Do not use my likeness in any manner.">
+                <label for="noConsent" class="md-checkbox-label">I do not consent. Do not use my likeness in any manner. 
+</label>
+              </div>
+            </div>
+          </div>
+      
+          <!-- Page 9 -->
+          <div class="tab signature-tab">
+            <div>
+              <p>My signature acknowledges that I am over the age of 18 and had sufficient time to read and understand the waiver. I have had the opportunity to seek my own legal advice and that I understand and agree to the conditions stated in this document and that they are binding on my heirs, next of kin, executors, administrators and successors.</p>
+            </div>
+            <div class="flex-row" id="signatureBlockRow">
+              <div class="flex-column signature-block">
+                <label id="passengerFullName"></label>
+                <div class="signature">
+                  <img id="passengerSignatureImg" src="#" alt="Passenger Signature, click to sign.">
+                  <label for="passengerSignatureImg" class="signature-text">Click to sign</label>
+                </div>
+                <p id="timestamp1"></p>
+              </div>
+              <div class="flex-column signature-block">
+                <div class="signature">
+                  <input class="md-input" id="witnessName" placeholder="Witness full name" oninput="validate(this)" type="text" required>
+                  <label class="md-label" for="witnessName">Witness full name</label>
+                </div>
+                <div class="signature">
+                  <img id="witnessSignatureImg" src="#" alt="Witness Signature, click to sign.">
+                  <label for="witnessSignatureImg" class="signature-text">Click to sign</label>
+                </div>
+                <p id="timestamp2"></p>
+              </div>
+            </div>    
+          </div>
+        </div>
+        
+        <div id="formFooter">
+          <div style="overflow:auto;">
+            <div style="display: flex; flex-direction: row; justify-content: right; gap: 1rem">
+              <button class="btn btn-primary-content" type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+              <button class="btn btn-primary-filled" type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+            </div>
+          </div>
+        </div>        
+      </form>
+
+      <div id="successPage">
+        <h1>Success!</h1>
+        <img src='https://cdn4.iconfinder.com/data/icons/seo-internet-2/128/1-73-1024.png' alt="success checkmark" width="100px" height="100px">
+        <p id="successMessage">Your waiver was successfully submitted. A copy of the waiver was emailed to you.</p>
+      </div>
+
+    </main>
+
+    
+
+    <footer id="pageFooter" class="flex-row">
+      <a href="https://cyclingwithoutagesociety.com" target="_blank">2024 Cycling Without Age Society 🔗</a>
+    </footer>
+  </div>
+    
+
+    <!-- Szimek Signature Pad library -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script> -->
+    <?!= include("signature_pad.min.js") ?>
+
+    <!-- Custom scripts -->
+    <?!= include("JavaScript") ?>
+</body>
+</html>

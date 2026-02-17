@@ -1,0 +1,529 @@
+<script>
+/**
+ *  Define Global variables
+ * 
+ */
+const blankImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAAAAXNSR0IArs4c6QAABGJJREFUeF7t1AEJAAAMAsHZv/RyPNwSyDncOQIECEQEFskpJgECBM5geQICBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAgQdWMQCX4yW9owAAAABJRU5ErkJggg==";
+var passengerSignature = blankImage; // Passenger signature PNG image data. Use blank image as sign button
+var passengerTimestamp = null; // Timestamp when passengers signature is saved   
+var witnessSignature = blankImage; // Witness signature PNG image data. Use blank image as sign button
+var witnessTimestamp = null; // Timestamp when witness' signature is saved      
+var drawing = false; // Used by the signature pad library
+var signee = "";
+
+
+/**
+ * Display the the first page of the multipage form in the form
+ * 
+ */ 
+var currentTab = 0; // Current tab is set to be the first tab (0)
+showTab(currentTab); // Display the current tab
+
+/**
+ *  Define DOM elements for signature page
+ * 
+ */
+const passengerSign = document.getElementById("passengerSign");
+const witnessSign = document.getElementById("witnessSign");
+const passengerSignatureImg = document.getElementById("passengerSignatureImg") // Passenger Signature Img Button
+passengerSignatureImg.src = passengerSignature; // Set up passenger signature image button
+const timestamp1 = document.getElementById("timestamp1"); // Passenger signature timestamp
+const witnessSignatureImg = document.getElementById("witnessSignatureImg") // Witness Signature Img Button
+witnessSignatureImg.src = witnessSignature; // Set up witness signature image button
+const timestamp2 = document.getElementById("timestamp2"); // Witness signature timestamp
+//var waiverFullName = `${passengerFirstName} ${passengerLastName}`;
+
+/**
+ *  Prevent accidental page reload
+ * 
+ */
+//window.onbeforeunload = function () {return false;}
+
+
+/**
+ * Define signature modal DOM elements
+ * 
+ */
+const modal = document.getElementById("modal");
+const closeSignatureButton = document.getElementById("closeSignatureButton");
+const canvas = document.getElementById("canvas");
+const saveSignatureButton = document.getElementById("saveSignatureButton");
+const clearSignatureButton = document.getElementById("clearSignatureButton");   
+var signaturePad = new SignaturePad(canvas, {});
+console.log(JSON.stringify(signaturePad));
+
+
+
+/********** Signature Pad Functions ****************/
+      
+
+/**
+ * Shows the signature modal dialog
+ * 
+ * @param {void}
+ * @return {void}
+ * 
+ */
+function showModal() {
+  console.log("Showing modal...");
+  
+  // Style and setup the signature pad elements
+  saveSignatureButton.innerHTML = "Save " + signee + " signature";
+  clearSignatureButton.innerHTML = "Clear " + signee + " signature";
+  modal.style.display = "flex";  // Show the modal
+  resizeCanvas();
+}
+
+/**
+ * Adjust canvas coordinate space taking into account pixel ratio,
+ * to make it look crisp on mobile devices.
+ * This also causes canvas to be cleared.
+ * 
+ * @param {void}
+ * @return {void}
+ * 
+ */
+function resizeCanvas() {
+  // When zoomed out to less than 100%, for some very strange reason,
+  // some browsers report devicePixelRatio as less than 1
+  // and only part of the canvas is cleared then.
+  var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+
+  // This part causes the canvas to be cleared
+  canvas.width = canvas.offsetWidth * ratio;
+  canvas.height = canvas.offsetHeight * ratio;
+  canvas.getContext("2d").scale(ratio, ratio);
+
+  // This library does not listen for canvas changes, so after the canvas is automatically
+  // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+  // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+  // that the state of this library is consistent with visual state of the canvas, you
+  // have to clear it manually.
+  signaturePad.clear();
+}
+
+/**
+ * Get the location of the canvas and the location of the pointer
+ * and starts a drawing path
+ * 
+ * @param {object} e: the mousedownevent object
+ * @return {void}
+ * @globals {boolean} drawing: true|false
+ * 
+ */
+function startDrawing(e) {
+  console.log('Drawing...');
+  drawing = true;
+  const rect = canvas.getBoundingClientRect(); // Get canvas position
+  const x = e.clientX - rect.left; // Adjust for canvas position
+  const y = e.clientY - rect.top; // Adjust for canvas position
+  ctx.moveTo(x, y);
+  ctx.beginPath();  
+}
+
+/**
+ * Continues the drawing path as long as the mouse is down
+ * on the Canvas element.
+ * 
+ * @param {object} e: mousemove event
+ * @return {void}
+ * @globals {boolean} drawing: true|false
+ * 
+ */
+function draw(e) {
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+/**
+ * StopsDrawing by setting the drawing global to false
+ * 
+ * @param {void}
+ * @return {void}
+ * @global {boolean} drawing: true|false
+ * 
+ */
+function stopDrawing() {
+  drawing = false;
+}  
+
+/**
+ * Event listeners for drawing in the canvas element
+ * 
+ */
+canvas.addEventListener("mousedown", startDrawing);
+canvas.addEventListener("mousemove", draw);
+canvas.addEventListener("mouseup", stopDrawing);
+canvas.addEventListener("mouseout", stopDrawing);
+
+/**
+ * On mobile devices it might make more sense to listen to orientation change,
+ * rather than window resize events.
+ * 
+ */
+window.onorientationchange = resizeCanvas;
+window.onresize = resizeCanvas;
+
+
+
+/************** Signature Pad Button Event listeners *******************/
+
+/**
+ * Signature Pad Button - Close Signature Pad ( X )
+ * Clears and Closes the signature pad without saving
+ * 
+ */
+closeSignatureButton.addEventListener("click", () => {
+    console.log("Close signature pad button clicked.");
+    signaturePad.clear();  // Clear the canvas
+    modal.style.display = "none";  // Hide the signature pad
+});
+
+/**
+ * Signature Pad button - Save Signature
+ * Returns the signature drawing as a PNG image
+ * 
+ */
+saveSignatureButton.addEventListener("click", () => { 
+  console.log("Save signature pad button clicked.");
+  if(signaturePad.isEmpty()) {
+    // Alert if canvas is empty
+    alert("Please sign before saving.");
+  } else {
+    if(signee === "passenger") {
+      passengerSignature = signaturePad.toDataURL(); //save image as PNG
+      passengerSignatureImg.src = passengerSignature;
+      passengerTimestamp = new Date();
+      timestamp1.innerHTML = passengerTimestamp;
+    } else {
+      witnessSignature = signaturePad.toDataURL(); //save image as PNG
+      witnessSignatureImg.src = witnessSignature;
+      witnessTimestamp = new Date();
+      timestamp2.innerHTML = witnessTimestamp;
+    }
+    // Clear the canvas
+    signaturePad.clear();
+    // Hide the signature pad
+    //signaturePad.off()
+    modal.style.display = "none";
+  }
+});
+
+/**
+ * Signature pad button - Clear Signature
+ * 
+ */
+clearSignatureButton.addEventListener("click", () => {
+  console.log("Clear signature pad button clicked.");
+  signaturePad.clear();  // Clear the signature canvas
+});
+
+
+
+
+/**
+ * Signature Pad Function Call Examples
+ * 
+ * 
+ * 
+ *Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible parameters)
+ *signaturePad.toDataURL(); // save image as PNG
+ *
+ * Draws signature image from data URL (mostly uses https://mdn.io/drawImage under-the-hood)
+ * NOTE: This method does not populate internal data structure that represents drawn signature. Thus, after using #fromDataURL, #toData won't work properly.
+ * signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
+ * 
+ * Draws signature image from data URL and alters it with the given options
+ * signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...", { ratio: 1, width: 400, height: 200, xOffset: 100, yOffset: 50 });
+ * 
+ * Returns signature image as an array of point groups
+ * const data = signaturePad.toData();
+ * 
+ * Draws signature image from an array of point groups
+ * signaturePad.fromData(data);
+ * 
+ * Draws signature image from an array of point groups, without clearing your existing image (clear defaults to true if not provided)
+ * signaturePad.fromData(data, { clear: false });
+ * 
+ * Clears the canvas
+ * signaturePad.clear();
+ * 
+ * Returns true if canvas is empty, otherwise returns false
+ * signaturePad.isEmpty();
+ * 
+ * Unbinds all event handlers
+ * signaturePad.off();
+ * 
+ * Rebinds all event handlers
+ * signaturePad.on();
+ * 
+ */
+
+
+/**
+ * This function will display the specified page of the multipage form
+ * 
+ * @param {number} n: the page number (0 indexed)
+ * @retun {void}
+ * 
+ */
+function showTab(n) {
+  var x = document.getElementsByClassName("tab");  // Gets the pages
+  x[n].style.display = "flex";  // Display page n
+  // ... and fix the Previous/Next buttons:
+  if (n == 0) {  
+    document.getElementById("prevBtn").style.display = "none"; // Hide the 'previous button' on the first page
+  } else {  
+    document.getElementById("prevBtn").style.display = "block"; // Show the 'previous button' on all other pages
+  }
+  if (n == (x.length - 1)) {  
+    document.getElementById("nextBtn").innerHTML = "Submit";  // On the last page show the 'next button' as 'Submit'
+    document.getElementById("passengerFullName").innerHTML = firstName.value + " " + lastName.value; // set the passengers name over the passenger signature block
+  } else {
+    document.getElementById("nextBtn").innerHTML = "Next"; // On all pages but the last, the 'next button' shows as 'Next'
+  }
+  fixStepIndicator(n);  // ... and run a function that displays the correct step indicator:
+}
+
+function nextPrev(n) {
+  // Setup the first waiver with input content
+  const passengerFirstName = document.getElementById("passenger-first-name").value;
+  const passengerLastName = document.getElementById("passenger-last-name").value;
+  const town = document.getElementById("town").value;
+  const representativeFirstName = document.getElementById("representative-first-name").value;
+  const representativeLastName = document.getElementById("representative-last-name").value;
+  
+
+  // This function will figure out which tab to display
+  var x = document.getElementsByClassName("tab");
+  // Exit the function if any field in the current tab is invalid:
+  if (n == 1 && !validateForm()) return false;
+  // Hide the current tab:
+  x[currentTab].style.display = "none";
+  // Increase or decrease the current tab by 1:
+  currentTab = currentTab + n;
+  // if you have reached the end of the form... :
+  if (currentTab >= x.length) {
+    //...the form gets submitted:
+    // document.getElementById("regForm").submit();
+    submitForm();
+    return false;
+  }
+  // Otherwise, display the correct tab:
+  showTab(currentTab);
+}
+
+/**
+ * Provides validation status for a form field. First by 
+ * determining if a 'pattern' attribute exists and then by
+ * testing the input against the regex pattern
+ * 
+ * @param {object} element: the form element object to be validated
+ * @return {string} 'valid'|'invalid'|null (if no pattern found)
+ */
+function validate(element) {
+  // Get the pattern attribute value
+  const pattern = element.pattern;
+
+  // Check if there's a pattern defined
+  if (!pattern) {
+    return; // No validation needed if no pattern
+  }
+
+  // Create a regular expression object from the pattern
+  const regex = new RegExp(pattern);
+
+  // Test the input value against the regular expression
+  const isValid = regex.test(element.value);
+
+  // Set the validity attribute based on the test result
+  element.validity = isValid ? 'valid' : 'invalid';
+}
+
+
+/**
+ * Checks for empty input fields and determines
+ * valid or false based on 'required' attribute
+ * being present.
+ * 
+ * @param {void}
+ * @return {boolean} valid: true|false
+ * 
+ */
+function validateForm() {
+  // This function deals with validation of the form fields
+  var x, y, i, valid = true;
+  x = document.getElementsByClassName("tab");
+  y = x[currentTab].getElementsByTagName("input");
+  // A loop that checks every input field in the current tab:
+  for (i = 0; i < y.length; i++) {
+    // If a field is empty...
+    if (!y[i].checkValidity()) {
+      // add an "invalid" class to the field:
+      y[i].className += " invalid";
+      // and set the current valid status to false:
+      valid = false;
+    }
+  }
+  // If the valid status is true, mark the step as finished and valid:
+  if (valid) {
+    document.getElementsByClassName("step")[currentTab].className += " finish";
+  }
+  return valid; // return the valid status
+}
+
+/**
+ * Change the waiver type according to the param (type) by
+ * changing the display between 'block' and 'none' on the 
+ * affected element classes: '.representative-only' and 
+ * '.passenger-only'.
+ * 
+ * @param {string} type - Must be either 'passenger' or 'representative'.
+ * @return {void}
+ */
+function changeWaiverType(type) {
+  let representativeOnlyElements = document.getElementsByClassName("representative-only");
+  console.log(`Representative-Only elements: ${representativeOnlyElements.length} type: ${representativeOnlyElements.typeOf}`);
+  let passengerOnlyElements = document.getElementsByClassName("passenger-only");
+  console.log(`Passenger-Only elements: ${passengerOnlyElements.length}  type: ${passengerOnlyElements.typeOf}`);
+  if (type === 'passenger') {
+    console.log('Changing waiver type to passenger.');
+    //if (passengerOnlyElements.length > 0) {
+      for(let i = 0; i < passengerOnlyElements.length; i++ ) {
+        passengerOnlyElements.item(i).style = "display: block";
+      }
+    //} 
+    
+    //if (representativeOnlyElements.length > 0) {
+      for(let i = 0; i < representativeOnlyElements.length; i++ ) {
+        representativeOnlyElements.item(i).style = "display: none";
+      }
+    //}
+
+  } else if (type === 'representative') {
+    console.log('Changing waiver type to representative.');
+    //if (passengerOnlyElements.length > 0) {
+      for(let i = 0; i < passengerOnlyElements.length; i++ ) {
+        passengerOnlyElements.item(i).style = "display: none";
+      }
+    //}
+
+    for(let i = 0; i < representativeOnlyElements.length; i++ ) {
+      representativeOnlyElements.item(i).style = "display: block";
+    }
+
+  } else {
+    console.log(`Waiver type ${type} is not valid.`);
+  }
+}
+
+/**
+ * Changes the page indicator to match the current form page
+ * on a mulitipage form
+ * 
+ * @param {int} n: page number (0 indexed)
+ * @return {void}
+ */ 
+function fixStepIndicator(n) {
+  // This function removes the "active" class of all steps...
+  var i, x = document.getElementsByClassName("step");
+  for (i = 0; i < x.length; i++) {
+    x[i].className = x[i].className.replace(" active", "");
+  }
+  //... and adds the "active" class to the current step:
+  x[n].className += " active";
+}
+
+/**
+ * Shows the preloader gif
+ * 
+ * @param {void}
+ * @return {void}
+ * 
+ */
+function showPreloader() {
+  document.getElementById("preloader").style.display = "flex";
+  return;
+}
+
+/**
+ * Hides the preloader gif
+ * 
+ * @param {void}
+ * @return {void}
+ * 
+ */
+function hidePreloader() {
+  document.getElementById("preloader").style.display = "none";
+  return;
+}
+
+/**
+ * Submits the form data to the backend for processng
+ * displays the success screen if successful or an alert
+ * if the submission failed.
+ * 
+ * @param {void}
+ * @return {void}
+ * 
+ */
+function submitForm() {
+  
+
+  // Collect form fields in data object
+  const data = {};
+  data.firstName = document.getElementById("firstName").value.trim();
+  data.lastName = document.getElementById("lastName").value.trim();
+  data.email = document.getElementById("email").value.trim();
+  data.phone = document.getElementById("phone").value.trim();
+  data.town = document.getElementById("town").value.trim();
+  data.waiver1 = document.getElementById("waiver1").value;
+  data.waiver2 = document.getElementById("waiver2").value;
+  data.waiver3 = document.getElementById("waiver3").value;
+  data.waiver4 = document.getElementById("waiver4").value;
+  data.waiver5 = document.getElementById("waiver5").value;
+  const consent = document.getElementById("consent").value;
+  const noConsent = document.getElementById("noConsent").value;
+  data.mediaRelease = document.getElementById("consent").checked ? consent : noConsent;
+  data.passengerSignature = passengerSignature;
+  data.passengerTimestamp = new Date(passengerTimestamp)/1000; // convert timestamp to UNIX Epoch
+  data.witnessName = document.getElementById("witnessName").value.trim();
+  data.witnessSignature = witnessSignature;
+  data.witnessTimestamp = new Date(witnessTimestamp)/1000; // convert timestamp to UNIX Epoch
+    
+  // Log data
+  const dataString = JSON.stringify(data);
+  console.log(dataString);
+
+  showPreloader();
+
+  // Submit data using google.script.run with callback for resetting
+  google.script.run
+    .withSuccessHandler(() => {
+      // Display success page 
+      document.getElementById("successPage").style.display = "flex";
+      // Hide form
+      document.getElementById("regForm").style.display = "none";
+      // Hide the loading overlay
+      hidePreloader();
+      })
+    .withFailureHandler(() => {
+      alert("Submission failed. Please try again later.");
+    })
+    .submitAgreement(data);
+ 
+}
+
+/**
+ * Event listeners for signature Page display custom signature modal
+ * depending on the signature block clicked.
+ * 
+ */
+passengerSignatureImg.addEventListener("click", () => {signee = "passenger"; showModal()});
+witnessSignatureImg.addEventListener("click", () => {signee = "witness"; showModal()});
+  
+</script>
