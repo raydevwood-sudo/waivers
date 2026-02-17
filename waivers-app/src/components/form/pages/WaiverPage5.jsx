@@ -2,8 +2,6 @@ import React from 'react';
 import Checkbox from '../../ui/Checkbox';
 
 export default function WaiverPage5({ formData, onInputChange }) {
-  const fullName = `${formData.firstName} ${formData.lastName}`;
-
   return (
     <div className="space-y-6">
       <div>
@@ -12,7 +10,7 @@ export default function WaiverPage5({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I, <span className="font-semibold text-gray-900">{fullName || '________________'}</span>, hereby warrant that I am physically and mentally able to ride in the trishaw and I do not have impairments or diseases which may endanger me, any other person, or which may affect the normal course of the outing, and I agree to notify Rowing Without Limits immediately if I have any changes in my ability to participate in this activity.
+        I do hereby indemnify and hold harmless the Cycling Without Age Society, its officers, directors, employees, members, agents, assigns, legal representatives and successors and any and all business associates and partners involved in the above noted activity and each of them, their owner, officers, and employees hereby waiving all claims for damage now or in the future arising from any loss, accident, injury or death which may be caused by or arise from participation of the individual named herein during this event; and agree to assume all risks for the activity noted above that the individual named herein has agreed to participate in.
       </p>
       
       <Checkbox

@@ -16,7 +16,7 @@ export default function InformedConsentPage4({ formData, onInputChange }) {
       <Checkbox
         id="informedConsent4"
         name="informedConsent4"
-        label="I agree to indemnify and hold harmless the Cycling Without Age Society and waive all claims for damage"
+        label="I agree"
         checked={formData.informedConsent4}
         onChange={(e) => onInputChange('informedConsent4', e.target.checked)}
         required

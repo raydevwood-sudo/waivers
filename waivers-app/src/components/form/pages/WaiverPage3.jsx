@@ -10,7 +10,7 @@ export default function WaiverPage3({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I understand my obligations to follow the instructions of my pilot, specifically, to remain in the trishaw while it is stopped and I understand that I have the right to request the return to the departure point and/or an immediate halt to the journey at any time.
+        I understand and agree that there are inherent risks associated with participation in this activity, that my participation is voluntary and that I am physically fit enough to participate in the activity.
       </p>
       
       <Checkbox

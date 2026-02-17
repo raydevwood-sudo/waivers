@@ -16,7 +16,7 @@ export default function InformedConsentPage2({ formData, onInputChange }) {
       <Checkbox
         id="informedConsent2"
         name="informedConsent2"
-        label="I understand the inherent risks and confirm the participant is physically fit to participate"
+        label="I agree"
         checked={formData.informedConsent2}
         onChange={(e) => onInputChange('informedConsent2', e.target.checked)}
         required

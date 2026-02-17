@@ -10,7 +10,7 @@ export default function WaiverPage2({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I understand that the pilot and co-pilot of the Cycling Without Age Society trishaw are volunteers and not professional drivers, and I further understand the risks of riding in any trishaw which include, but are not limited to, the risk of collision with other vehicles (traffic) and pedestrians, the risk of falling from the trishaw. I further understand that if I am dropped off by my caregiver, it is my responsibility to arrange for my safe transportation to and from my home (or from any of the drop-off points.)
+        I, the undersigned, am the person named herein taking part in the Cycling Without Age Program as a passenger.
       </p>
       
       <Checkbox

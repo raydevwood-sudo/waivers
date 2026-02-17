@@ -10,13 +10,13 @@ export default function InformedConsentPage3({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I accept all responsibility for their participation including the possibility of personal injury, death, property damage of any kind notwithstanding that the injury, loss may have been contributed to or occasioned by the negligence of the Cycling Without Age Society - Sidney and its officers, directors, employees, members, agents, assigns, legal representative, and successors.
+        I accept all responsibility for their participation including the possibility of personal injury, death, property damage of any kind notwithstanding that the injury, loss may have been contributed to or occasioned by the negligence of the Cycling Without Age Society - Sidney and its officers, directors, employed, members, agents, assigns, legal representative, and successors.
       </p>
       
       <Checkbox
         id="informedConsent3"
         name="informedConsent3"
-        label="I accept all responsibility for the participant's participation, including risks of injury, death, or property damage"
+        label="I agree"
         checked={formData.informedConsent3}
         onChange={(e) => onInputChange('informedConsent3', e.target.checked)}
         required
