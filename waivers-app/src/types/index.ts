@@ -11,9 +11,9 @@ export interface FormData {
   waiverType: WaiverType;
   
   // Personal Information
-  passengerFirstName: string;
-  passengerLastName: string;
-  passengerTown: string;
+  firstName: string;
+  lastName: string;
+  town: string;
   representativeFirstName?: string;
   representativeLastName?: string;
   
@@ -40,10 +40,10 @@ export interface FormData {
   
   // Signatures
   passengerSignature: string;
-  passengerTimestamp: string;
+  passengerTimestamp: string | number;
   witnessName: string;
   witnessSignature: string;
-  witnessTimestamp: string;
+  witnessTimestamp?: string | number;
 }
 
 // Component Props Types
@@ -70,6 +70,9 @@ export interface WaiverSubmission {
   waiverUId?: string;
   createdAt?: string;
   expiryDate?: string;
+  pdfUrl?: string;
+  pdfStoragePath?: string;
+  pdfFilePath?: string;
   waiverType: WaiverType;
   passenger: {
     firstName: string;
@@ -100,12 +103,12 @@ export interface WaiverSubmission {
   signatures: {
     passenger: {
       imageUrl: string;
-      timestamp: string;
+      timestamp: string | number;
     };
     witness: {
       name: string;
       imageUrl: string;
-      timestamp: string;
+      timestamp?: string | number;
     };
   };
 }

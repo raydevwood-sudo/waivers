@@ -89,8 +89,8 @@ export default function WaiverForm({ onSubmit }) {
     }
   };
 
-  const handleSignatureSave = (signatureDataURL, timestamp) => {
-    const { signee } = signatureModal;
+  const handleSignatureSave = (signatureDataURL, timestamp, signeeArg) => {
+    const signee = signeeArg || signatureModal.signee;
     if (signee === 'passenger') {
       setFormData(prev => ({
         ...prev,
@@ -264,8 +264,8 @@ export default function WaiverForm({ onSubmit }) {
       const submissionData = {
         ...formData,
         waiverType,
-        passengerTimestamp: formData.passengerTimestamp?.getTime() / 1000,
-        witnessTimestamp: formData.witnessTimestamp?.getTime() / 1000,
+        passengerTimestamp: formData.passengerTimestamp?.getTime(),
+        witnessTimestamp: formData.witnessTimestamp?.getTime(),
       };
       onSubmit(submissionData);
     } else {

@@ -1,4 +1,4 @@
-# Passenger Application & Waiver App
+# Waiver and Release of Liability App
 
 A modern, accessible waiver form application built with React, TypeScript, and Firebase.
 

@@ -31,7 +31,7 @@ function Header() {
         />
         <div>
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
-            Passenger Application & Waiver
+            Waiver and Release of Liability
           </h1>
           <p className="text-xs text-gray-500 hidden sm:block">Cycling Without Age Society</p>
         </div>

@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
+import { getAppCheck, getToken, initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,7 +15,28 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+if (recaptchaSiteKey) {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 // Initialize Firestore
 export const db = getFirestore(app);
+
+// Initialize Storage
+export const storage = getStorage(app);
+
+export async function getAppCheckToken(): Promise<string | null> {
+  if (!recaptchaSiteKey) {
+    return null;
+  }
+
+  const appCheck = getAppCheck(app);
+  const tokenResult = await getToken(appCheck, false);
+  return tokenResult.token;
+}
 
 export default app;

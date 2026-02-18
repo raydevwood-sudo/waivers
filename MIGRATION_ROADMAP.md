@@ -1,7 +1,7 @@
 # Waiver System Migration Roadmap
 ## From Google Apps Script to React + Vite + Tailwind + Firebase
 
-**Project:** Cycling Without Age Society - Passenger Agreement and Waiver System  
+**Project:** Cycling Without Age Society - Waiver and Release of Liability System  
 **Created:** February 16, 2026  
 **Repository:** raydevwood-sudo/waivers
 
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document outlines the complete migration plan for the Passenger Waiver application from Google Apps Script to a modern web stack including React, Vite, Tailwind CSS, Firebase Hosting, Firestore, and Firebase Functions.
+This document outlines the complete migration plan for the Waiver and Release of Liability application from Google Apps Script to a modern web stack including React, Vite, Tailwind CSS, Firebase Hosting, Firestore, and Firebase Functions.
 
 ### Current System (Google Apps Script)
 - **Frontend:** HTML + vanilla JavaScript with Material Design-inspired CSS
@@ -58,12 +58,12 @@ This document outlines the complete migration plan for the Passenger Waiver appl
 
 #### Core Features
 - ✅ Multi-step form (9 pages) with progress indicator
-- ✅ Two waiver types: Passenger vs Legal Representative
+- ✅ Two waiver types: Individual vs Legal Representative
 - ✅ Digital signature capture (passenger + witness)
 - ✅ Form validation with pattern matching
 - ✅ Media release consent options
 - ✅ PDF waiver generation from template
-- ✅ Email delivery to passenger
+- ✅ Email delivery to participant
 - ✅ Data storage in spreadsheet
 - ✅ Success page with confirmation
 
@@ -77,7 +77,7 @@ This document outlines the complete migration plan for the Passenger Waiver appl
 6. Converts Doc to PDF → 
 7. Saves PDF to Drive → 
 8. Writes row to Google Sheets → 
-9. Emails PDF to passenger →
+9. Emails PDF to participant →
 10. Shows success page
 ```
 
@@ -530,7 +530,7 @@ functions/
    - Generate unique filename
    - Upload to Firebase Storage
    - Create signed/public URL
-   - Set metadata (creation date, passenger name, etc.)
+  - Set metadata (creation date, participant name, etc.)
 
 5. **Testing**
    - Test all field combinations
@@ -565,7 +565,7 @@ functions/
 3. **Create Email Templates**
    - HTML email template
    - Plain text fallback
-   - Include passenger name
+  - Include participant name
    - Add waiver details
    - Professional styling
 
@@ -622,6 +622,7 @@ functions/
    - Validation errors
    - Server errors
    - User-friendly error messages
+  - If submission fails, show a **Send Support Email** button with prefilled context (waiver type, timestamp, and error summary)
 
 5. **Success Page**
    - Display confirmation message
@@ -1313,7 +1314,7 @@ async function generatePDF(waiverDoc, signatures) {
   // Build PDF content
   // Header
   doc.fontSize(20)
-     .text('Passenger Agreement and Waiver', { align: 'center' });
+      .text('Waiver and Release of Liability - Individual', { align: 'center' });
   
   doc.moveDown();
   doc.fontSize(12);
@@ -1493,12 +1494,12 @@ async function sendEmail(recipientEmail, passenger, waiverDoc, pdfUrl) {
         name: 'Cycling Without Age Society',
       },
       replyTo: 'info@cyclingwithoutagesociety.org',
-      subject: `Passenger Waiver - ${new Date().toLocaleDateString()}`,
+      subject: `Waiver and Release of Liability - ${new Date().toLocaleDateString()}`,
       text: `Hello ${passenger.firstName} ${passenger.lastName}.\n\nYour waiver has been successfully submitted. Please find your waiver document attached or download it using the link below.\n\nWaiver ID: ${waiverDoc.waiverUId}\n\nDownload: ${pdfUrl}\n\nThank you,\nCycling Without Age Society`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #00d1a2; color: white; padding: 20px; text-align: center;">
-            <h1>Passenger Waiver Confirmation</h1>
+            <h1>Waiver and Release of Liability Confirmation</h1>
           </div>
           <div style="padding: 20px; background-color: #f5f5f5;">
             <p>Hello ${passenger.firstName} ${passenger.lastName},</p>
@@ -1568,7 +1569,7 @@ module.exports = { sendEmail };
 The PDF will replicate the original Google Doc template with:
 - Header with organization name
 - Waiver ID and dates (created, expiry)
-- Passenger information section
+- Individual participant information section
 - Representative information (if applicable)
 - Full waiver text with agreements
 - Media release section
@@ -1602,7 +1603,7 @@ The PDF will replicate the original Google Doc template with:
 
 ### 9.2 Email Template
 
-Subject: `Passenger Waiver - [Date]`
+Subject: `Waiver and Release of Liability - [Date]`
 
 Body includes:
 - Personalized greeting
@@ -1763,6 +1764,7 @@ firebase functions:config:set \
 - [ ] Signature capture works (passenger & witness)
 - [ ] Multi-step navigation works
 - [ ] Form submits successfully
+- [ ] On submission failure, a **Send Support Email** button is shown and opens a prefilled support email draft
 - [ ] PDF is generated correctly
 - [ ] Email is received with attachment
 - [ ] Mobile responsiveness
@@ -1948,7 +1950,7 @@ A dedicated editor application for managing waiver content templates, enabling n
 1. **Template Editor Interface**
    - WYSIWYG editor for waiver clauses
    - Section management (add/remove/reorder clauses)
-   - Support for both passenger and representative waivers
+  - Support for both individual and legal representative waivers
    - Rich text formatting capabilities
    - Template variable management (e.g., `{{firstName}}`, `{{town}}`)
 

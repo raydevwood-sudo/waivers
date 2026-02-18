@@ -1,10 +1,10 @@
-# Passenger Waiver System
+# Waiver and Release of Liability System
 
 **Cycling Without Age Society** - Digital Waiver Application
 
 ## Overview
 
-This repository contains the migration of the Passenger Agreement and Waiver system from Google Apps Script to a modern web stack using React, Vite, Tailwind CSS, Firebase Hosting, Firestore, and Firebase Functions.
+This repository contains the migration of the Waiver and Release of Liability system from Google Apps Script to a modern web stack using React, Vite, Tailwind CSS, Firebase Hosting, Firestore, and Firebase Functions.
 
 ### Current Status
 
@@ -27,12 +27,12 @@ Migrate from:
 ## Features
 
 - ✅ Multi-step form (9 pages) with progress indicator
-- ✅ Two waiver types: Passenger vs Legal Representative
+- ✅ Two waiver types: Individual vs Legal Representative
 - ✅ Digital signature capture (passenger + witness)
 - ✅ Form validation with pattern matching
 - ✅ Media release consent options
 - ✅ PDF waiver generation
-- ✅ Email delivery to passenger
+- ✅ Email delivery to participant
 - ✅ Secure data storage
 - ✅ Mobile-responsive design
 

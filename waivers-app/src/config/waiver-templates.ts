@@ -18,7 +18,7 @@ export const ORGANIZATION_LOGO_URL = '/android-chrome-512x512.png'; // Path to o
  * Passenger Waiver Content
  */
 export const PASSENGER_WAIVER = {
-  title: 'Passenger Application Confidentiality and Application Agreement',
+  title: 'Waiver and Release of Liability - Individual',
   
   introduction: {
     template: (firstName: string, lastName: string, town: string) => 
@@ -58,7 +58,7 @@ export const PASSENGER_WAIVER = {
  * Representative (Legal Guardian/POA) Waiver Content
  */
 export const REPRESENTATIVE_WAIVER = {
-  title: 'Informed Consent for Legal Guardian/Power of Attorney',
+  title: 'Waiver and Release of Liability - Legal Representative',
   
   introduction: {
     template: (representativeFirstName: string, representativeLastName: string, passengerFirstName: string, passengerLastName: string, town: string) =>

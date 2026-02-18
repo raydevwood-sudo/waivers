@@ -2,10 +2,9 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Waivers collection - allow public writes, no reads from client
+    // Waivers are written via Cloud Functions only (admin SDK bypasses rules)
     match /waivers/{document=**} {
-      allow read: if false;  // No reading from client (for privacy)
-      allow write: if true;  // Allow public waiver submissions
+      allow read, write: if false;
     }
     
     // Deny all other collections

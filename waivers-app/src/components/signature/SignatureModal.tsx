@@ -5,7 +5,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, signee }) {
   if (!isOpen) return null;
 
   const handleSave = (signatureDataURL, timestamp) => {
-    onSave(signatureDataURL, timestamp);
+    onSave(signatureDataURL, timestamp, signee);
     onClose();
   };
 

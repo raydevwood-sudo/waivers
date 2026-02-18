@@ -1,11 +1,47 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import type { FormData, WaiverSubmission } from '../types';
+import { generateWaiverPDF } from './pdf-generator.service';
+import { getAppCheckToken } from '../config/firebase';
 
-export interface FirestoreWaiverSubmission extends Omit<FormData, 'passengerTimestamp' | 'witnessTimestamp'> {
-  passengerTimestamp: Timestamp;
-  witnessTimestamp: Timestamp;
-  submittedAt: Timestamp;
+function normalizeEpochToMillis(value: number): number {
+  return value < 100000000000 ? value * 1000 : value;
+}
+
+function toEpochMillis(timestamp?: string | number): number | undefined {
+  if (timestamp === undefined) return undefined;
+
+  if (typeof timestamp === 'string') {
+    const parsedNumber = Number(timestamp);
+    if (Number.isFinite(parsedNumber)) {
+      return normalizeEpochToMillis(parsedNumber);
+    }
+
+    const parsedDate = Date.parse(timestamp);
+    return Number.isNaN(parsedDate) ? undefined : parsedDate;
+  }
+
+  if (!Number.isFinite(timestamp)) return undefined;
+  return normalizeEpochToMillis(timestamp);
+}
+
+async function pdfToBase64(submission: WaiverSubmission): Promise<string> {
+  const pdf = await generateWaiverPDF(submission);
+  const dataUri = pdf.output('datauristring');
+  const commaIndex = dataUri.indexOf(',');
+  if (commaIndex === -1) {
+    throw new Error('Failed to encode PDF payload.');
+  }
+
+  return dataUri.slice(commaIndex + 1);
+}
+
+function getSubmitWaiverEndpoint(): string {
+  const customBaseUrl = import.meta.env.VITE_FUNCTIONS_BASE_URL as string | undefined;
+  if (customBaseUrl) {
+    return `${customBaseUrl.replace(/\/$/, '')}/submitWaiverSecure`;
+  }
+
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID as string;
+  return `https://us-central1-${projectId}.cloudfunctions.net/submitWaiverSecure`;
 }
 
 /**
@@ -22,9 +58,9 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
     expiryDate: expiryDate.toISOString(),
     waiverType: formData.waiverType,
     passenger: {
-      firstName: formData.passengerFirstName,
-      lastName: formData.passengerLastName,
-      town: formData.passengerTown,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      town: formData.town,
     },
     representative: formData.representativeFirstName && formData.representativeLastName ? {
       firstName: formData.representativeFirstName,
@@ -50,12 +86,12 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
     signatures: {
       passenger: {
         imageUrl: formData.passengerSignature,
-        timestamp: formData.passengerTimestamp,
+        timestamp: toEpochMillis(formData.passengerTimestamp) ?? Date.now(),
       },
       witness: {
         name: formData.witnessName,
         imageUrl: formData.witnessSignature,
-        timestamp: formData.witnessTimestamp,
+        timestamp: toEpochMillis(formData.witnessTimestamp),
       },
     },
   };
@@ -68,35 +104,54 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
  */
 export async function submitWaiver(formData: FormData): Promise<{ docId: string; submission: WaiverSubmission }> {
   try {
-    // Convert Unix timestamps to Firestore Timestamps
-    const passengerTimestamp = Timestamp.fromMillis(
-      typeof formData.passengerTimestamp === 'string' 
-        ? parseFloat(formData.passengerTimestamp) * 1000 
-        : formData.passengerTimestamp
-    );
-    
-    const witnessTimestamp = Timestamp.fromMillis(
-      typeof formData.witnessTimestamp === 'string' 
-        ? parseFloat(formData.witnessTimestamp) * 1000 
-        : formData.witnessTimestamp
-    );
+    const appCheckToken = await getAppCheckToken();
+    if (!appCheckToken) {
+      throw new Error('App Check is not configured. Set VITE_RECAPTCHA_SITE_KEY.');
+    }
 
-    const waiverData: FirestoreWaiverSubmission = {
-      ...formData,
-      passengerTimestamp,
-      witnessTimestamp,
-      submittedAt: Timestamp.now(),
+    // Validate timestamp payload before secure submit
+    const passengerMillis = toEpochMillis(formData.passengerTimestamp);
+    if (passengerMillis === undefined) {
+      throw new Error('Passenger signature timestamp is missing or invalid.');
+    }
+
+    const docId = crypto.randomUUID();
+    const submission = convertFormDataToSubmission(formData, docId);
+    const pdfBase64 = await pdfToBase64(submission);
+
+    const securePayload = {
+      docId,
+      formData: {
+        ...formData,
+        passengerTimestamp: passengerMillis,
+        witnessTimestamp: toEpochMillis(formData.witnessTimestamp),
+      },
+      pdfBase64,
     };
 
-    // Add document to 'waivers' collection
-    const docRef = await addDoc(collection(db, 'waivers'), waiverData);
-    
-    console.log('Waiver submitted successfully with ID:', docRef.id);
-    
-    // Convert to WaiverSubmission format for PDF generation
-    const submission = convertFormDataToSubmission(formData, docRef.id);
-    
-    return { docId: docRef.id, submission };
+    const response = await fetch(getSubmitWaiverEndpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Firebase-AppCheck': appCheckToken,
+      },
+      body: JSON.stringify(securePayload),
+    });
+
+    if (!response.ok) {
+      throw new Error('Secure waiver submission failed.');
+    }
+
+    const responseJson = await response.json() as {
+      docId: string;
+      pdfStoragePath?: string;
+      pdfFilePath?: string;
+    };
+
+    submission.pdfStoragePath = responseJson.pdfStoragePath;
+    submission.pdfFilePath = responseJson.pdfFilePath;
+
+    return { docId: responseJson.docId || docId, submission };
   } catch (error) {
     console.error('Error submitting waiver:', error);
     throw new Error('Failed to submit waiver. Please try again.');
