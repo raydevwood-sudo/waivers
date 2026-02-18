@@ -4,11 +4,12 @@ import WaiverForm from './components/form/WaiverForm'
 import SuccessPage from './components/SuccessPage'
 import Loader from './components/ui/Loader'
 import { submitWaiver, isFirebaseConfigured } from './services/waiver.service'
-import type { FormData } from './types'
+import type { FormData, WaiverSubmission } from './types'
 
 function App() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
+  const [submissionData, setSubmissionData] = useState<WaiverSubmission | null>(null)
 
   const handleSubmit = async (formData: FormData): Promise<void> => {
     setIsSubmitting(true)
@@ -19,9 +20,10 @@ function App() {
       }
 
       // Submit to Firestore
-      const documentId = await submitWaiver(formData);
-      console.log('Waiver submitted successfully with ID:', documentId);
+      const { docId, submission } = await submitWaiver(formData);
+      console.log('Waiver submitted successfully with ID:', docId);
       
+      setSubmissionData(submission);
       setIsSubmitted(true)
     } catch (error) {
       console.error('Submission failed:', error);
@@ -35,8 +37,8 @@ function App() {
   return (
     <Layout>
       {isSubmitting && <Loader />}
-      {isSubmitted ? (
-        <SuccessPage />
+      {isSubmitted && submissionData ? (
+        <SuccessPage submission={submissionData} />
       ) : (
         <WaiverForm onSubmit={handleSubmit} />
       )}

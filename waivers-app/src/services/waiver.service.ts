@@ -1,19 +1,72 @@
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { FormData } from '../types';
+import type { FormData, WaiverSubmission } from '../types';
 
-export interface WaiverSubmission extends Omit<FormData, 'passengerTimestamp' | 'witnessTimestamp'> {
+export interface FirestoreWaiverSubmission extends Omit<FormData, 'passengerTimestamp' | 'witnessTimestamp'> {
   passengerTimestamp: Timestamp;
   witnessTimestamp: Timestamp;
   submittedAt: Timestamp;
 }
 
 /**
+ * Convert FormData to WaiverSubmission format for PDF generation
+ */
+function convertFormDataToSubmission(formData: FormData, docId: string): WaiverSubmission {
+  const now = new Date().toISOString();
+  const expiryDate = new Date();
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1); // 1 year expiry
+  
+  return {
+    waiverUId: docId,
+    createdAt: now,
+    expiryDate: expiryDate.toISOString(),
+    waiverType: formData.waiverType,
+    passenger: {
+      firstName: formData.passengerFirstName,
+      lastName: formData.passengerLastName,
+      town: formData.passengerTown,
+    },
+    representative: formData.representativeFirstName && formData.representativeLastName ? {
+      firstName: formData.representativeFirstName,
+      lastName: formData.representativeLastName,
+    } : undefined,
+    contact: {
+      email: formData.email,
+      phone: formData.phone,
+    },
+    agreements: {
+      informedConsent1: formData.informedConsent1,
+      informedConsent2: formData.informedConsent2,
+      informedConsent3: formData.informedConsent3,
+      informedConsent4: formData.informedConsent4,
+      informedConsent5: formData.informedConsent5,
+      waiver1: formData.waiver1,
+      waiver2: formData.waiver2,
+      waiver3: formData.waiver3,
+      waiver4: formData.waiver4,
+      waiver5: formData.waiver5,
+    },
+    mediaRelease: formData.mediaRelease,
+    signatures: {
+      passenger: {
+        imageUrl: formData.passengerSignature,
+        timestamp: formData.passengerTimestamp,
+      },
+      witness: {
+        name: formData.witnessName,
+        imageUrl: formData.witnessSignature,
+        timestamp: formData.witnessTimestamp,
+      },
+    },
+  };
+}
+
+/**
  * Submit a waiver form to Firestore
  * @param formData - The form data to submit
- * @returns The document ID of the created waiver
+ * @returns Object containing the document ID and structured submission data for PDF generation
  */
-export async function submitWaiver(formData: FormData): Promise<string> {
+export async function submitWaiver(formData: FormData): Promise<{ docId: string; submission: WaiverSubmission }> {
   try {
     // Convert Unix timestamps to Firestore Timestamps
     const passengerTimestamp = Timestamp.fromMillis(
@@ -28,7 +81,7 @@ export async function submitWaiver(formData: FormData): Promise<string> {
         : formData.witnessTimestamp
     );
 
-    const waiverData: WaiverSubmission = {
+    const waiverData: FirestoreWaiverSubmission = {
       ...formData,
       passengerTimestamp,
       witnessTimestamp,
@@ -39,7 +92,11 @@ export async function submitWaiver(formData: FormData): Promise<string> {
     const docRef = await addDoc(collection(db, 'waivers'), waiverData);
     
     console.log('Waiver submitted successfully with ID:', docRef.id);
-    return docRef.id;
+    
+    // Convert to WaiverSubmission format for PDF generation
+    const submission = convertFormDataToSubmission(formData, docRef.id);
+    
+    return { docId: docRef.id, submission };
   } catch (error) {
     console.error('Error submitting waiver:', error);
     throw new Error('Failed to submit waiver. Please try again.');

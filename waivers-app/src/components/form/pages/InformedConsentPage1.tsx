@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
 
 export default function InformedConsentPage1({ formData, onInputChange }) {
   return (
@@ -16,7 +17,7 @@ export default function InformedConsentPage1({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I the undersigned attest that I am the Legal Guardian/Power of Attorney of the person named herein taking part in the Cycling Without Age Program as a Passenger.
+        {REPRESENTATIVE_WAIVER.informedConsentSection.clauses[0]}
       </p>
       
       <Checkbox

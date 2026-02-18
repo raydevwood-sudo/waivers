@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
 
 export default function InformedConsentPage2({ formData, onInputChange }) {
   return (
@@ -10,7 +11,7 @@ export default function InformedConsentPage2({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I understand and agree that there are inherent risks associated with participation in this activity, that participation is voluntary and that the participant is physically fit enough to participate in the activity.
+        {REPRESENTATIVE_WAIVER.informedConsentSection.clauses[1]}
       </p>
       
       <Checkbox

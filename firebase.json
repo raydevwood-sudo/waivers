@@ -24,6 +24,7 @@
     }
   ],
   "hosting": {
+    "site": "passenger-waivers",
     "public": "waivers-app/dist",
     "ignore": [
       "firebase.json",

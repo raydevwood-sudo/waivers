@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
 
 export default function WaiverPage2({ formData, onInputChange }) {
   return (
@@ -10,7 +11,7 @@ export default function WaiverPage2({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I, the undersigned, am the person named herein taking part in the Cycling Without Age Program as a passenger.
+        {PASSENGER_WAIVER.waiverSection.clauses[0]}
       </p>
       
       <Checkbox

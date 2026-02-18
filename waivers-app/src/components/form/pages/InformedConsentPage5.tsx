@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
 
 export default function InformedConsentPage5({ formData, onInputChange }) {
   return (
@@ -10,7 +11,7 @@ export default function InformedConsentPage5({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        My signature acknowledges that I have had sufficient time to read and understand this informed consent. By signing it I agree to the above conditions and allow the individual named herein to participate in the activity named. I understand that the conditions are binding on my heirs, next of kin, executors, administrators, and successors.
+        {REPRESENTATIVE_WAIVER.informedConsentSection.clauses[4]}
       </p>
       
       <Checkbox

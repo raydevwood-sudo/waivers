@@ -1,8 +1,14 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
 
 export default function WaiverPage1({ formData, onInputChange }) {
   const fullName = `${formData.firstName} ${formData.lastName}`;
+  const introText = PASSENGER_WAIVER.introduction.template(
+    formData.firstName || '[First Name]',
+    formData.lastName || '[Last Name]',
+    formData.town || '[Town]'
+  );
 
   return (
     <div className="space-y-6">
@@ -12,11 +18,7 @@ export default function WaiverPage1({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I, <span className="font-semibold text-gray-900">{fullName || '________________'}</span>, of the town of <span className="font-semibold text-gray-900">{formData.town || '________________'}</span>, have received, read and understand the{' '}
-        <a href="#" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">
-          Cycling Without Age Passenger Handbook
-        </a>{' '}
-        and Confidentiality guidelines, and agree to abide by the procedures listed therein and I attest that all of the information I have provided herein is accurate and complete. I understand and agree that acceptance into the program is entirely at the discretion of the Cycling Without Age Society program coordinator.
+        {introText}
       </p>
       
       <Checkbox

@@ -23,7 +23,7 @@ function Header() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm" role="banner">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
         <img 
-          src="https://raywood-cwas.github.io/images/favicon.png" 
+          src="/android-chrome-512x512.png" 
           alt="CWAS logo" 
           width="40" 
           height="40"

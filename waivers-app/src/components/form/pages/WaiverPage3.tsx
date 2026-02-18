@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
 
 export default function WaiverPage3({ formData, onInputChange }) {
   return (
@@ -10,7 +11,7 @@ export default function WaiverPage3({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I understand and agree that there are inherent risks associated with participation in this activity, that my participation is voluntary and that I am physically fit enough to participate in the activity.
+        {PASSENGER_WAIVER.waiverSection.clauses[1]}
       </p>
       
       <Checkbox

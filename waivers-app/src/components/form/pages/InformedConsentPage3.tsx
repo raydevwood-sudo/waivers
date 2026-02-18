@@ -1,5 +1,6 @@
 import React from 'react';
 import Checkbox from '../../ui/Checkbox';
+import { REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
 
 export default function InformedConsentPage3({ formData, onInputChange }) {
   return (
@@ -10,7 +11,7 @@ export default function InformedConsentPage3({ formData, onInputChange }) {
       </div>
 
       <p className="text-base leading-relaxed text-gray-700">
-        I accept all responsibility for their participation including the possibility of personal injury, death, property damage of any kind notwithstanding that the injury, loss may have been contributed to or occasioned by the negligence of the Cycling Without Age Society - Sidney and its officers, directors, employed, members, agents, assigns, legal representative, and successors.
+        {REPRESENTATIVE_WAIVER.informedConsentSection.clauses[2]}
       </p>
       
       <Checkbox

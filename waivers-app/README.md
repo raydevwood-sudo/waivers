@@ -68,12 +68,40 @@ src/
 │   ├── signature/      # Signature capture
 │   └── ui/             # Reusable UI components
 ├── config/             # Configuration files
-│   └── firebase.ts     # Firebase initialization
+│   ├── firebase.ts     # Firebase initialization
+│   └── waiver-templates.ts  # Waiver content templates (version controlled)
 ├── services/           # Business logic
+│   ├── pdf-generator.service.ts  # PDF generation
 │   └── waiver.service.ts  # Waiver submission
 ├── types/              # TypeScript type definitions
 └── App.tsx             # Main application component
 ```
+
+### Adding Your Organization Logo
+
+Your logo is already configured! The file `public/android-chrome-512x512.png` is automatically used in:
+
+- ✅ Browser favicon/tab icon
+- ✅ App header (top-left corner)
+- ✅ PDF documents (when configured)
+
+**To replace the logo:**
+```bash
+# Replace the existing file with your new logo
+cp your-new-logo.png public/android-chrome-512x512.png
+```
+
+**Or rename to use a different file:**
+1. Add your logo to `public/` folder
+2. Update references in:
+   - `index.html` (favicon links)
+   - `src/components/layout/Layout.tsx` (header image)
+   - `src/config/waiver-templates.ts` (ORGANIZATION_LOGO_URL)
+
+**For PDF generation with logo:**
+- The logo path is configured in `src/config/waiver-templates.ts`
+- To include in PDFs, pass the logo as a data URL in the submission object
+- See `pdf-generator.service.ts` for implementation details
 
 ## Accessibility
 

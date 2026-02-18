@@ -1926,6 +1926,191 @@ Potential features to consider:
 - QR code for easy form access
 - Offline form completion (PWA)
 
+#### **Priority Enhancement: Waiver Template Editor App**
+
+A dedicated editor application for managing waiver content templates, enabling non-technical users to update waiver clauses, versioning, and content without code changes.
+
+**Purpose:**
+- Centralized management of waiver content and clauses
+- Version control for legal content changes
+- Audit trail for content modifications
+- Preview PDF output before publishing
+- Rollback capability to previous versions
+
+**Technical Architecture:**
+- **Separate React Application** - Standalone admin app in the repository
+- **Firebase Authentication** - Admin-only access control
+- **Firestore Database** - Store template versions and history
+- **Real-time Preview** - Live PDF preview using the PDF generator service
+- **Version Management** - Track all changes with timestamps and authors
+
+**Key Features:**
+1. **Template Editor Interface**
+   - WYSIWYG editor for waiver clauses
+   - Section management (add/remove/reorder clauses)
+   - Support for both passenger and representative waivers
+   - Rich text formatting capabilities
+   - Template variable management (e.g., `{{firstName}}`, `{{town}}`)
+
+2. **Version Control System**
+   - Semantic versioning (v1.0, v1.1, v2.0)
+   - Version history with diff viewer
+   - Rollback to previous versions
+   - Draft/Published states
+   - Effective date management
+
+3. **Preview & Testing**
+   - Real-time PDF preview with sample data
+   - Side-by-side comparison of versions
+   - Test data sets for validation
+   - Mobile/Desktop preview modes
+
+4. **Audit & Compliance**
+   - Full change history log
+   - User attribution for all changes
+   - Approval workflow (optional)
+   - Export audit logs
+   - Legal annotations and notes
+
+5. **Publishing Workflow**
+   - Review changes before publishing
+   - Set effective dates for new versions
+   - Automatic migration of waiver-templates.ts
+   - Notification system for content changes
+   - Staging/Production environment support
+
+**Implementation Approach:**
+
+```
+/waivers
+├── waivers-app/          # Main waiver submission app
+├── editor-app/           # NEW: Template editor app
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── editor/
+│   │   │   │   ├── ClauseEditor.tsx
+│   │   │   │   ├── TemplateEditor.tsx
+│   │   │   │   ├── VersionManager.tsx
+│   │   │   │   └── PDFPreview.tsx
+│   │   │   ├── auth/
+│   │   │   │   └── AdminAuth.tsx
+│   │   │   └── ui/
+│   │   ├── services/
+│   │   │   ├── template.service.ts
+│   │   │   └── version.service.ts
+│   │   └── config/
+│   │       └── firebase.ts
+│   └── README.md
+├── functions/            # Shared functions
+└── shared/              # NEW: Shared code between apps
+    └── waiver-templates/ # Template definitions
+```
+
+**Firestore Schema for Template Management:**
+
+```typescript
+// Collection: waiver_templates
+{
+  id: "v1.0",
+  version: "v1.0",
+  versionDate: "2024-05-28",
+  status: "published" | "draft",
+  effectiveDate: "2024-05-28",
+  waiverType: "passenger" | "representative",
+  content: {
+    title: "...",
+    introduction: {
+      template: "...",
+      variables: ["firstName", "lastName", "town"]
+    },
+    sections: [
+      {
+        id: "waiver_section",
+        title: "Waiver of Liability",
+        clauses: ["...", "...", "..."]
+      },
+      {
+        id: "media_release",
+        title: "Media Release",
+        description: "...",
+        options: {
+          fullConsent: "...",
+          consentWithInitials: "...",
+          noConsent: "..."
+        }
+      }
+    ]
+  },
+  metadata: {
+    createdBy: "admin@cwas.org",
+    createdAt: timestamp,
+    modifiedBy: "admin@cwas.org",
+    modifiedAt: timestamp,
+    notes: "Updated liability clause per legal review"
+  }
+}
+
+// Collection: template_history
+{
+  id: auto,
+  templateId: "v1.0",
+  action: "created" | "updated" | "published" | "rolled_back",
+  changes: {
+    field: "sections.waiver_section.clauses[2]",
+    oldValue: "...",
+    newValue: "..."
+  },
+  performedBy: "admin@cwas.org",
+  performedAt: timestamp
+}
+```
+
+**Development Phases:**
+
+**Phase 1: Basic Editor (1-2 weeks)**
+- Authentication and authorization
+- Basic text editor for clauses
+- Save/Load templates from Firestore
+- Simple version numbering
+
+**Phase 2: Version Control (1 week)**
+- Version history display
+- Diff viewer
+- Rollback functionality
+- Audit logging
+
+**Phase 3: PDF Preview (1 week)**
+- Integration with PDF generator
+- Real-time preview
+- Test data management
+- Version comparison preview
+
+**Phase 4: Publishing Workflow (1 week)**
+- Draft/Published state management
+- Effective date handling
+- Code generation for waiver-templates.ts
+- Notification system
+
+**Phase 5: Advanced Features (Optional)**
+- Approval workflows
+- Multi-user collaboration
+- Rich text editor with formatting
+- Template variable management UI
+- Export/Import templates
+
+**Benefits:**
+- ✅ Legal team can update content without developer involvement
+- ✅ Complete audit trail for compliance
+- ✅ Version control prevents accidental content loss
+- ✅ Preview ensures no formatting issues before publishing
+- ✅ Rollback capability for quick error recovery
+- ✅ Centralized single source of truth
+- ✅ Reduced deployment friction for content changes
+
+**Estimated Effort:** 4-6 weeks for full implementation  
+**Priority:** Medium-High (after main waiver system is stable)  
+**Dependencies:** Main waiver app must be deployed first
+
 ---
 
 ## 18. Next Steps

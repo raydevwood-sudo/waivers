@@ -1,5 +1,6 @@
 import React from 'react';
 import Input from '../../ui/Input';
+import { PASSENGER_WAIVER, REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
 
 export default function SignaturePage({ formData, waiverType, onInputChange, onOpenSignature }) {
   const isRepresentative = waiverType === 'representative';
@@ -7,6 +8,11 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
   const representativeFullName = isRepresentative 
     ? `${formData.representativeFirstName} ${formData.representativeLastName}`
     : '';
+
+  // Get acknowledgment text from appropriate template
+  const acknowledgmentText = isRepresentative
+    ? REPRESENTATIVE_WAIVER.informedConsentSection.clauses[4]
+    : PASSENGER_WAIVER.acknowledgment;
 
   return (
     <div className="space-y-6">
@@ -17,7 +23,7 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-xl">
         <p className="text-sm text-gray-700 leading-relaxed">
-          My signature acknowledges that I am over the age of 18 and had sufficient time to read and understand the waiver. I have had the opportunity to seek my own legal advice and that I understand and agree to the conditions stated in this document and that they are binding on my heirs, next of kin, executors, administrators and successors.
+          {acknowledgmentText}
         </p>
       </div>
       
