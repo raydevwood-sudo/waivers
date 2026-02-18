@@ -9,6 +9,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   className?: string;
+  ariaLabel?: string;
 }
 
 export default function Button({ 
@@ -17,7 +18,8 @@ export default function Button({
   type = 'button',
   variant = 'primary',
   disabled = false,
-  className = ''
+  className = '',
+  ariaLabel
 }: ButtonProps) {
   const variants: Record<ButtonVariant, string> = {
     primary: 'bg-primary hover:bg-primary-hover text-white shadow-lg hover:shadow-xl disabled:bg-gray-300',
@@ -30,6 +32,8 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
+      aria-disabled={disabled}
       className={`
         px-6 py-3 rounded-xl font-medium transition-all duration-200
         focus:outline-none focus:ring-4 focus:ring-primary/20

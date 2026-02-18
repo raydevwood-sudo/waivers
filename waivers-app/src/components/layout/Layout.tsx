@@ -3,8 +3,14 @@ import React from 'react';
 export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <a 
+        href="#main-content" 
+        className="sr-only sr-only-focusable fixed top-0 left-0 z-50 bg-primary text-white px-4 py-2 rounded-br-lg"
+      >
+        Skip to main content
+      </a>
       <Header />
-      <main className="flex-1 flex flex-col py-4 sm:py-6 md:py-8 px-4">
+      <main id="main-content" className="flex-1 flex flex-col" role="main">
         {children}
       </main>
       <Footer />
@@ -14,7 +20,7 @@ export default function Layout({ children }) {
 
 function Header() {
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm" role="banner">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
         <img 
           src="https://raywood-cwas.github.io/images/favicon.png" 
@@ -36,13 +42,14 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 py-4">
+    <footer className="bg-white border-t border-gray-200 py-4" role="contentinfo">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <a 
           href="https://cyclingwithoutagesociety.com" 
           target="_blank" 
           rel="noopener noreferrer"
           className="text-sm text-gray-600 hover:text-primary transition-colors"
+          aria-label="Visit Cycling Without Age Society website (opens in new window)"
         >
           © 2024 Cycling Without Age Society
         </a>

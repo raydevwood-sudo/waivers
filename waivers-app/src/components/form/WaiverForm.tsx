@@ -326,23 +326,39 @@ export default function WaiverForm({ onSubmit }) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <FormProgress currentStep={currentStep} totalSteps={getTotalSteps(waiverType)} />
+    <div className="w-full max-w-3xl mx-auto px-4 py-6">
+      {/* Screen reader announcements for page changes */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        Step {currentStep + 1} of {getTotalSteps(waiverType)}
+      </div>
       
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 mb-20">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8" role="form" aria-label="Waiver form">
+        <FormProgress currentStep={currentStep} totalSteps={getTotalSteps(waiverType)} />
+        
         {renderCurrentPage()}
+        
+        <FormNavigation
+          currentStep={currentStep}
+          totalSteps={getTotalSteps(waiverType)}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+        />
       </div>
 
       {validationErrors.length > 0 && (
-        <div className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-8 sm:w-96 bg-red-50 border-2 border-red-200 rounded-xl p-4 shadow-2xl animate-shake z-40">
+        <div 
+          className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 bg-red-50 border-2 border-red-200 rounded-xl p-4 shadow-2xl animate-shake z-50"
+          role="alert"
+          aria-live="assertive"
+        >
           <div className="flex items-start gap-3">
-            <span className="text-red-500 text-xl flex-shrink-0">⚠️</span>
+            <span className="text-red-500 text-xl flex-shrink-0" aria-hidden="true">⚠️</span>
             <div className="flex-1 min-w-0">
               <h3 className="text-red-800 font-semibold mb-2">Please correct:</h3>
               <ul className="space-y-1 text-sm text-red-700">
                 {validationErrors.map((error, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <span className="flex-shrink-0">•</span>
+                    <span className="flex-shrink-0" aria-hidden="true">•</span>
                     <span className="flex-1">{error}</span>
                   </li>
                 ))}
@@ -351,13 +367,6 @@ export default function WaiverForm({ onSubmit }) {
           </div>
         </div>
       )}
-
-      <FormNavigation
-        currentStep={currentStep}
-        totalSteps={getTotalSteps(waiverType)}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-      />
 
       <SignatureModal
         isOpen={signatureModal.isOpen}

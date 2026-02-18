@@ -25,11 +25,13 @@ export default function Checkbox({
         checked={checked}
         onChange={onChange}
         required={required}
+        aria-required={required}
+        aria-checked={checked}
         className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-4 focus:ring-primary/20 focus:ring-offset-0 mt-0.5 flex-shrink-0 cursor-pointer"
       />
       <span className="text-base text-gray-700 flex-1">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
       </span>
     </label>
   );

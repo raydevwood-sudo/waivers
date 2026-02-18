@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout'
 import WaiverForm from './components/form/WaiverForm'
 import SuccessPage from './components/SuccessPage'
 import Loader from './components/ui/Loader'
+import { submitWaiver, isFirebaseConfigured } from './services/waiver.service'
 import type { FormData } from './types'
 
 function App() {
@@ -12,16 +13,20 @@ function App() {
   const handleSubmit = async (formData: FormData): Promise<void> => {
     setIsSubmitting(true)
     try {
-      // TODO: Submit to Firebase Function
-      console.log('Form data:', formData)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Check if Firebase is configured
+      if (!isFirebaseConfigured()) {
+        throw new Error('Firebase is not properly configured. Please check your environment variables.');
+      }
+
+      // Submit to Firestore
+      const documentId = await submitWaiver(formData);
+      console.log('Waiver submitted successfully with ID:', documentId);
       
       setIsSubmitted(true)
     } catch (error) {
-      console.error('Submission failed:', error)
-      alert('Submission failed. Please try again later.')
+      console.error('Submission failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Submission failed. Please try again later.';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false)
     }

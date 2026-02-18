@@ -24,29 +24,29 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
       <div className="grid md:grid-cols-2 gap-6">
         {/* Passenger or Legal Representative Signature */}
         <div className="space-y-3">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              {isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {isRepresentative ? representativeFullName : passengerFullName}
+          <h3 className="text-lg font-semibold text-gray-900">
+            {isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
+          </h3>
+          <p className="text-sm text-gray-600">
+            {isRepresentative ? representativeFullName : passengerFullName}
+          </p>
+          {isRepresentative && (
+            <p className="text-sm text-gray-500 italic">
+              Legal Representative of {passengerFullName}
             </p>
-            {isRepresentative && (
-              <p className="text-sm text-gray-500 italic mt-1">
-                Legal Representative of {passengerFullName}
-              </p>
-            )}
-          </div>
+          )}
+          {/* Spacer to match witness input field height */}
+          <div className="h-[48px]"></div>
           
           <button
             type="button"
             onClick={() => onOpenSignature('passenger')}
-            className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
+            className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 h-40 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
           >
             <img
               src={formData.passengerSignature}
               alt={isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
-              className="w-full h-24 object-contain"
+              className="w-full h-full object-contain"
             />
             {!formData.passengerTimestamp && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -82,12 +82,12 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
           <button
             type="button"
             onClick={() => onOpenSignature('witness')}
-            className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
+            className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 h-40 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
           >
             <img
               src={formData.witnessSignature}
               alt="Witness Signature"
-              className="w-full h-24 object-contain"
+              className="w-full h-full object-contain"
             />
             {!formData.witnessTimestamp && (
               <div className="absolute inset-0 flex items-center justify-center">

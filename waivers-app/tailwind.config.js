@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#00d1a2',
-        'primary-hover': '#00b890',
+        primary: '#1976D2',
+        'primary-hover': '#1565C0',
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'],

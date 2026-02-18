@@ -1,16 +1,141 @@
-# React + Vite
+# Passenger Application & Waiver App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, accessible waiver form application built with React, TypeScript, and Firebase.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ Multi-step form with progress tracking
+- ✅ Digital signature capture
+- ✅ WCAG 2.1 Level AA compliant
+- ✅ Full screen reader support
+- ✅ Mobile responsive design
+- ✅ Firebase Firestore integration
+- ✅ TypeScript for type safety
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js 18+ installed
+- A Firebase account and project
+- npm or yarn package manager
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+1. **Clone the repository and install dependencies:**
+   ```bash
+   cd waivers-app
+   npm install
+   ```
+
+2. **Set up Firebase:**
+   
+   Follow the detailed instructions in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+   
+   Quick steps:
+   - Create a Firebase project
+   - Enable Firestore Database
+   - Copy your Firebase config values
+   - Create `.env.local` from `.env.example`
+   - Add your Firebase credentials
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser:**
+   
+   Navigate to `http://localhost:5173`
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+
+### Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── form/           # Form pages and navigation
+│   ├── layout/         # Layout components
+│   ├── signature/      # Signature capture
+│   └── ui/             # Reusable UI components
+├── config/             # Configuration files
+│   └── firebase.ts     # Firebase initialization
+├── services/           # Business logic
+│   └── waiver.service.ts  # Waiver submission
+├── types/              # TypeScript type definitions
+└── App.tsx             # Main application component
+```
+
+## Accessibility
+
+This application meets WCAG 2.1 Level AA standards:
+
+- Proper ARIA labels and roles
+- Keyboard navigation support
+- Screen reader announcements
+- Sufficient color contrast (4.5:1+)
+- Focus indicators
+- Skip navigation links
+- Form validation with clear error messages
+
+## Firebase Integration
+
+The app stores all waiver submissions in Firebase Firestore. Each submission includes:
+
+- Participant information
+- Waiver agreement acknowledgments
+- Digital signatures (base64 encoded images)
+- Timestamps for signatures and submission
+
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for complete setup instructions.
+
+## Deployment
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+The optimized production build will be in the `dist/` directory.
+
+### Deploy to Firebase Hosting (Optional)
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Initialize Firebase Hosting
+firebase init hosting
+
+# Deploy
+firebase deploy --only hosting
+```
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## License
+
+© 2024 Cycling Without Age Society
+
+## Support
+
+For issues or questions, please contact the development team.
+

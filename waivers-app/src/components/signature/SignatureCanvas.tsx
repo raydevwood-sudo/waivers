@@ -73,10 +73,12 @@ export default function SignatureCanvas({ onSave }: SignatureCanvasProps) {
           style={{
             height: '300px'
           }}
+          role="img"
+          aria-label="Signature drawing area - use mouse or touch to sign"
         />
       </div>
       
-      <p className="text-sm text-gray-500 text-center">
+      <p className="text-sm text-gray-500 text-center" id="signature-instructions">
         Sign above using your mouse or touch screen
       </p>
 
@@ -84,12 +86,14 @@ export default function SignatureCanvas({ onSave }: SignatureCanvasProps) {
         <button 
           onClick={handleClear}
           className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20"
+          aria-label="Clear signature"
         >
           Clear
         </button>
         <button 
           onClick={handleSave}
           className="flex-1 px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20"
+          aria-label="Save signature and continue"
         >
           Save Signature
         </button>
