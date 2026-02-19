@@ -32,6 +32,217 @@ This document outlines the complete migration plan for the Waiver and Release of
 
 ---
 
+## 🎉 Current Status - MIGRATION COMPLETE + ENHANCEMENTS
+
+**Status:** ✅ **DEPLOYED TO PRODUCTION**  
+**Last Updated:** February 19, 2026  
+**Deployment Date:** February 16-19, 2026
+
+### Production Applications
+
+#### 1. **Passenger Waiver Submission** (Public)
+- **URL:** https://passenger-waivers.web.app
+- **Purpose:** Public-facing waiver submission form
+- **Status:** ✅ Fully operational
+- **Features:**
+  - Multi-step form with 14 pages (waiver type, personal info, 5 informed consent pages, 5 waiver pages, media release, signature)
+  - Digital signature capture for passenger and witness
+  - Form validation and progress tracking
+  - PDF generation with embedded signatures
+  - Automatic PDF storage in Firebase Storage
+  - Data persistence in Firestore with 1-year expiry tracking
+  - Success confirmation page
+- **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4
+- **Backend:** Cloud Function `submitWaiverSecure` (Node.js 24, us-central1)
+
+#### 2. **Valid Waivers Admin Portal** (Authenticated)
+- **URL:** https://valid-waivers.web.app
+- **Purpose:** Staff portal for viewing and searching valid waivers
+- **Status:** ✅ Fully operational
+- **Features:**
+  - Google Sign-In authentication (any Google account)
+  - Sortable waiver table (Last Name, First Name, Expiry Date)
+  - Search by first or last name
+  - Filter by validity status (valid/expired/all)
+  - Media release indicator (camera icon)
+  - Click-to-view PDF modal viewer
+  - Alternating row colors for readability
+  - Real-time data from Firestore
+- **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth
+- **Security:** Authenticated read access to Firestore and Storage
+
+#### 3. **Paper Waiver Upload** (Authenticated)
+- **URL:** https://paper-waiver-upload.web.app
+- **Purpose:** Staff tool for digitizing paper waivers
+- **Status:** ✅ Deployed (requires auth domain config)
+- **Features:**
+  - Google Sign-In authentication
+  - Manual data entry form (mirrors digital waiver fields)
+  - PDF file upload for scanned paper waivers
+  - Waiver type selection (passenger/representative)
+  - Automatic expiry calculation (+1 year from submission date)
+  - Upload tracking (uploadedBy, uploadedAt, source: "paper-upload")
+  - Form validation and error handling
+  - Success confirmation with auto-reset
+- **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth/Storage
+- **Final Step:** Add authorized domain `paper-waiver-upload.web.app` to Firebase Auth
+
+### Firebase Infrastructure
+
+#### Project Details
+- **Project ID:** `cwas-testing`
+- **Region:** northamerica-northeast2
+- **Multi-site Hosting:** 3 sites (passenger-waivers, valid-waivers, paper-waiver-upload)
+
+#### Cloud Functions (2nd Gen)
+- **submitWaiverSecure** (us-central1, Node.js 24)
+  - Receives waiver data and PDF from frontend
+  - Validates request (App Check made optional)
+  - Uploads PDF to Storage at `waivers/pdfs/{docId}.pdf`
+  - Writes waiver metadata to Firestore
+  - Returns success confirmation
+  - Warning logs for missing App Check tokens
+
+#### Firestore Database
+- **Collection:** `waivers`
+- **Schema:**
+  - Passenger info (firstName, lastName, town, email, phone)
+  - Representative info (conditional)
+  - Agreement flags (informedConsent1-5, waiver1-5)
+  - Signatures (passengerSignature, witnessSignature, passengerTimestamp, witnessTimestamp)
+  - Metadata (submittedAt, pdfFilePath, pdfStoragePath, pdfGeneratedAt)
+  - Media release (mediaRelease: 'yes' | 'no')
+  - Upload tracking (uploadedBy, uploadedById, uploadedAt, source) [paper waivers only]
+- **Security Rules:** 
+  - Public write via Cloud Function only
+  - Authenticated read access for admin apps
+
+#### Firebase Storage
+- **Path:** `waivers/pdfs/`
+- **Security Rules:** Authenticated read access
+- **Files:** PDF waivers with UUID filenames
+
+#### Firebase Authentication
+- **Provider:** Google Sign-In
+- **Authorized Domains:**
+  - passenger-waivers.web.app
+  - valid-waivers.web.app
+  - waivers-admin.web.app (legacy)
+  - paper-waiver-upload.web.app (pending addition)
+
+### Completed Migration Phases
+
+#### ✅ Phase 1: Project Setup & Infrastructure
+- Firebase project created and configured
+- Multi-site hosting configured
+- Repository initialized (raydevwood-sudo/waivers)
+- Development environment set up
+- Dependencies installed (React 19, Vite 7, Tailwind CSS 3.4)
+
+#### ✅ Phase 2: UI Components & Styling
+- Complete component library built
+- Tailwind CSS configured with custom theme
+- Reusable form components (Input, Button, Radio, Checkbox, Loader)
+- Signature canvas component with clear/undo functionality
+- Modal components for PDF viewing
+- Responsive layout with mobile support
+
+#### ✅ Phase 3: Form Logic & State Management
+- Multi-step form with 14 pages
+- Form validation and error handling
+- Progress indicator with step tracking
+- Conditional fields based on waiver type
+- Navigation between steps (Next/Previous)
+- Form data persistence across steps
+
+#### ✅ Phase 4: Firebase Backend Setup
+- Cloud Functions deployed (Node.js 24, 2nd Gen)
+- Firestore database configured
+- Firebase Storage configured
+- Security rules implemented (authenticated read, function write)
+- App Check made optional (no ReCaptcha dependency)
+
+#### ✅ Phase 5: PDF Generation
+- Client-side PDF generation using jsPDF
+- Dynamic template with all waiver text
+- Signature embedding (Base64 PNG)
+- Multi-page PDF support
+- PDF metadata (creation date, title)
+- Storage in Firebase Storage
+
+#### ✅ Phase 6: Email Integration
+- Status: **Deferred** (not required for MVP)
+- PDFs accessible via admin portal instead
+
+#### ✅ Phase 7: Integration & Data Flow
+- Complete submission pipeline working
+- Form → PDF → Cloud Function → Storage/Firestore
+- Success confirmation page
+- Error handling and user feedback
+
+#### ✅ Phase 8: Testing & Deployment
+- Local testing completed
+- Production deployment successful
+- End-to-end waiver submission verified
+- Admin portal viewing verified
+- Security rules validated
+
+### Additional Features Beyond Original Scope
+
+#### Admin Portal ("Valid Waivers")
+- **Scope:** Not in original roadmap
+- **Delivered:** Full admin viewer with search, filter, sorting, and PDF viewing
+- **Value:** Enables staff to quickly find and verify valid waivers without direct database access
+
+#### Paper Waiver Upload Tool
+- **Scope:** Not in original roadmap  
+- **Delivered:** Authenticated form for manual entry and PDF upload of paper waivers
+- **Value:** Bridges gap between legacy paper waivers and digital system, enables complete waiver database
+
+#### Branding & UX Polish
+- Custom logo integration (Cycling Without Age Society)
+- Alternating row colors for table readability
+- Media release visual indicator
+- Loading states and error messages
+- Responsive design for mobile/tablet
+
+### Technical Achievements
+
+- **Modern Stack:** React 19 + Vite 7 + TypeScript 5.9 + Tailwind CSS 3.4
+- **Serverless Architecture:** Firebase Cloud Functions (2nd Gen, Node.js 24)
+- **Multi-site Hosting:** 3 independent applications on single Firebase project
+- **Authentication:** Google Sign-In with authorized domain management
+- **Security:** Granular Firestore/Storage rules, App Check optional
+- **Performance:** Client-side PDF generation, optimized bundle sizes
+- **Code Quality:** ESLint with Google config, TypeScript strict mode, consistent formatting
+
+### Outstanding Tasks
+
+1. ✅ **Passenger Waiver App** - Complete and operational
+2. ✅ **Admin Viewer** - Complete and operational
+3. ⏳ **Paper Waiver Upload** - Deployed, needs auth domain added (1 min manual step)
+4. ❌ **Email Integration** - Deferred (not required for MVP)
+5. ❌ **Domain Custom URL** - Using Firebase subdomains (cyclingwithoutagesociety.org integration deferred)
+
+### Next Steps
+
+1. **Add paper-waiver-upload.web.app to Firebase Auth authorized domains** (1 min)
+2. **Train staff on Valid Waivers admin portal** (viewing/searching)
+3. **Train staff on Paper Waiver Upload tool** (manual data entry)
+4. **Monitor Cloud Function usage and costs**
+5. **Future: Enable App Check with ReCaptcha for spam protection** (optional)
+6. **Future: Add email delivery via SendGrid** (optional enhancement)
+7. **Future: Custom domain setup** (cyclingwithoutagesociety.org redirect)
+
+### Repository Information
+
+- **Repository:** https://github.com/raydevwood-sudo/waivers
+- **Branch:** main
+- **Latest Commit:** 351264c - "Add paper waiver upload app for manual entry of scanned waivers"
+- **Previous Commit:** a47101b - "Rebrand to Valid Waivers with logo and remove sign-out button"
+
+---
+
 ## Table of Contents
 
 1. [Current System Analysis](#1-current-system-analysis)
@@ -2168,6 +2379,13 @@ npm run deploy       # Deploy functions
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** February 16, 2026  
-**Status:** Draft - Awaiting Approval
+**Document Version:** 2.0  
+**Last Updated:** February 19, 2026  
+**Status:** ✅ MIGRATION COMPLETE - 3 Apps Deployed to Production
+
+**Migration Summary:**
+- ✅ Passenger waiver submission app (passenger-waivers.web.app) - LIVE
+- ✅ Valid waivers admin portal (valid-waivers.web.app) - LIVE  
+- ✅ Paper waiver upload tool (paper-waiver-upload.web.app) - DEPLOYED
+- 🚀 All core functionality operational
+- 📊 Enhanced with admin features beyond original scope
