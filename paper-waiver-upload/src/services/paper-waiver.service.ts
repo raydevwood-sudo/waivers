@@ -36,7 +36,8 @@ export async function uploadPaperWaiver(
     // Overlay waiver information on the PDF
     const { modifiedPdf, waiverId } = await overlayWaiverInfo(
       formData.pdfFile,
-      signedDate
+      signedDate,
+      uploadedBy.email || 'Unknown'
     );
 
     // Use waiver ID as document ID

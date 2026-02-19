@@ -28,7 +28,8 @@ function formatDate(date: Date): string {
  */
 export async function overlayWaiverInfo(
   pdfFile: File,
-  signedDate: Date
+  signedDate: Date,
+  uploadedBy: string
 ): Promise<{ modifiedPdf: Blob; waiverId: string }> {
   // Read the uploaded PDF
   const arrayBuffer = await pdfFile.arrayBuffer();
@@ -41,8 +42,8 @@ export async function overlayWaiverInfo(
   const expiryDate = new Date(signedDate);
   expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-  // Get the current date (export date)
-  const exportDate = new Date();
+  // Get the current date (upload date)
+  const uploadDate = new Date();
 
   // Embed the font
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -54,9 +55,9 @@ export async function overlayWaiverInfo(
 
   // Define overlay position (top-right corner)
   const boxX = width - 130;
-  const boxY = height - 60;
+  const boxY = height - 80;
   const boxWidth = 120;
-  const boxHeight = 50;
+  const boxHeight = 70;
   const textX = boxX + 5;
   let textY = boxY + boxHeight - 12;
   const fontSize = 8;
@@ -125,15 +126,34 @@ export async function overlayWaiverInfo(
   });
   textY -= lineHeight;
 
-  // Add export date
-  firstPage.drawText('Exported:', {
+  // Add uploaded by
+  firstPage.drawText('Uploaded by:', {
     x: textX,
     y: textY,
     size: fontSize,
     font: boldFont,
     color: rgb(0, 0, 0),
   });
-  firstPage.drawText(formatDate(exportDate), {
+  // Truncate email if too long
+  const shortEmail = uploadedBy.length > 18 ? uploadedBy.substring(0, 15) + '...' : uploadedBy;
+  firstPage.drawText(shortEmail, {
+    x: textX + 45,
+    y: textY,
+    size: fontSize - 1,
+    font: font,
+    color: rgb(0, 0, 0),
+  });
+  textY -= lineHeight;
+
+  // Add upload date
+  firstPage.drawText('Uploaded:', {
+    x: textX,
+    y: textY,
+    size: fontSize,
+    font: boldFont,
+    color: rgb(0, 0, 0),
+  });
+  firstPage.drawText(formatDate(uploadDate), {
     x: textX + 45,
     y: textY,
     size: fontSize,
