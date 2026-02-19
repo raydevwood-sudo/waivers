@@ -55,7 +55,7 @@
       ]
     },
     {
-      "site": "paper-waiver-upload",
+      "site": "waiver-upload",
       "public": "paper-waiver-upload/dist",
       "ignore": [
         "firebase.json",
