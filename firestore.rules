@@ -4,10 +4,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Waivers collection
     match /waivers/{document=**} {
-      // Public can't read or write directly (writes go through Cloud Functions)
-      // Authenticated users can read all waivers
+      // Authenticated users can read all waivers (for admin portal)
       allow read: if request.auth != null;
-      allow write: if false;
+      // Authenticated users can write (for paper waiver uploads)
+      // Public writes go through Cloud Functions
+      allow write: if request.auth != null;
     }
     
     // Deny all other collections
