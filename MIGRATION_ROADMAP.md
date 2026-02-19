@@ -87,8 +87,8 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth/Storage
 - **Final Step:** Add authorized domain `paper-waiver-upload.web.app` to Firebase Auth
 
-#### 4. **Admin Management App** (Planned)
-- **URL:** `admin-waivers.web.app` (proposed)
+#### 4. **Waivers Admin** (Planned)
+- **URL:** `waivers-admin.web.app` (proposed)
 - **Purpose:** Restricted app for managing platform settings and waiver versions
 - **Status:** 🟡 Planned
 - **MVP Scope:**
@@ -236,7 +236,7 @@ This document outlines the complete migration plan for the Waiver and Release of
 2. ✅ **Valid Waivers App** - Complete and operational
 3. ⏳ **Paper Waiver Upload** - Deployed, needs auth domain added (1 min manual step)
 4. ❌ **Email Integration** - Deferred (not required for MVP)
-5. ❌ **Admin Management App** - Planned and not started
+5. ❌ **Waivers Admin** - Planned and not started
 6. ❌ **Domain Custom URL** - Using Firebase subdomains (cyclingwithoutagesociety.org integration deferred)
 
 ### Next Steps
@@ -244,7 +244,7 @@ This document outlines the complete migration plan for the Waiver and Release of
 1. **Add paper-waiver-upload.web.app to Firebase Auth authorized domains** (1 min)
 2. **Train volunteers on Valid Waivers app** (viewing/searching)
 3. **Train staff on Paper Waiver Upload tool** (manual data entry)
-4. **Build Admin Management App MVP** (settings + access control + version metadata)
+4. **Build Waivers Admin MVP** (settings + access control + version metadata)
 5. **Monitor Cloud Function usage and costs**
 6. **Future: Enable App Check with ReCaptcha for spam protection** (optional)
 7. **Future: Add email delivery via SendGrid** (optional enhancement)
@@ -2155,7 +2155,7 @@ Potential features to consider:
 - QR code for easy form access
 - Offline form completion (PWA)
 
-#### **Priority Enhancement: Admin Management App (Settings + Governance)**
+#### **Priority Enhancement: Waivers Admin (Settings + Governance)**
 
 A dedicated restricted application for operational administration of the waiver platform.
 
@@ -2183,7 +2183,7 @@ A dedicated restricted application for operational administration of the waiver 
    - Persist `updatedBy` (authenticated admin email)
 
 **Technical Architecture:**
-- **Separate React App** in repository (proposed folder: `waivers-admin-app/`)
+- **Separate React App** in repository (proposed folder: `waivers-admin/`)
 - **Firebase Auth (Google)** with restricted allowlist/domain policy
 - **Firestore** as source of truth (`waivers/settings`)
 - **Form-based UI** with explicit Save/Cancel actions
