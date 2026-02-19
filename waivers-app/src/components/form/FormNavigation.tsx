@@ -1,5 +1,12 @@
-import React from 'react';
 import Button from '../ui/Button';
+
+interface FormNavigationProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  currentStep: number;
+  totalSteps: number;
+  showPrevious?: boolean;
+}
 
 export default function FormNavigation({ 
   onPrevious, 
@@ -7,7 +14,7 @@ export default function FormNavigation({
   currentStep, 
   totalSteps,
   showPrevious = true 
-}) {
+}: FormNavigationProps) {
   const isLastStep = currentStep === totalSteps - 1;
 
   return (

@@ -1,6 +1,4 @@
 import type { FormData, WaiverSubmission } from '../types';
-import { generateWaiverPDF } from './pdf-generator.service';
-import { getAppCheckToken } from '../config/firebase';
 
 function normalizeEpochToMillis(value: number): number {
   return value < 100000000000 ? value * 1000 : value;
@@ -24,6 +22,7 @@ function toEpochMillis(timestamp?: string | number): number | undefined {
 }
 
 async function pdfToBase64(submission: WaiverSubmission): Promise<string> {
+  const { generateWaiverPDF } = await import('./pdf-generator.service');
   const pdf = await generateWaiverPDF(submission);
   const dataUri = pdf.output('datauristring');
   const commaIndex = dataUri.indexOf(',');
@@ -104,6 +103,7 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
  */
 export async function submitWaiver(formData: FormData): Promise<{ docId: string; submission: WaiverSubmission }> {
   try {
+    const { getAppCheckToken } = await import('../config/firebase');
     const appCheckToken = await getAppCheckToken();
     if (!appCheckToken) {
       throw new Error('App Check is not configured. Set VITE_RECAPTCHA_SITE_KEY.');

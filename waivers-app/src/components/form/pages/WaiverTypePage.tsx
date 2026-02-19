@@ -1,7 +1,10 @@
-import React from 'react';
 import Radio from '../../ui/Radio';
+import type { FormPageProps } from './types';
+import type { WaiverType } from '../../../types';
 
-export default function WaiverTypePage({ waiverType, onWaiverTypeChange }) {
+type WaiverTypePageProps = Pick<FormPageProps, 'waiverType' | 'onWaiverTypeChange'>;
+
+export default function WaiverTypePage({ waiverType, onWaiverTypeChange }: WaiverTypePageProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +18,7 @@ export default function WaiverTypePage({ waiverType, onWaiverTypeChange }) {
           name="waiverType"
           value="passenger"
           checked={waiverType === 'passenger'}
-          onChange={(e) => onWaiverTypeChange(e.target.value)}
+          onChange={(e) => onWaiverTypeChange(e.target.value as WaiverType)}
           label="I am the passenger"
           description="Complete this form on your own behalf"
         />
@@ -24,7 +27,7 @@ export default function WaiverTypePage({ waiverType, onWaiverTypeChange }) {
           name="waiverType"
           value="representative"
           checked={waiverType === 'representative'}
-          onChange={(e) => onWaiverTypeChange(e.target.value)}
+          onChange={(e) => onWaiverTypeChange(e.target.value as WaiverType)}
           label="I am a legal representative"
           description="Legal Guardian or Power of Attorney authorized to release liability"
         />

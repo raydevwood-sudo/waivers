@@ -1,4 +1,14 @@
-import React from 'react';
+import type { ChangeEvent } from 'react';
+
+interface CheckboxProps {
+  id: string;
+  name: string;
+  label: string;
+  checked: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  className?: string;
+}
 
 export default function Checkbox({ 
   id,
@@ -8,7 +18,7 @@ export default function Checkbox({
   onChange,
   required = false,
   className = ''
-}) {
+}: CheckboxProps) {
   return (
     <label 
       htmlFor={id} 

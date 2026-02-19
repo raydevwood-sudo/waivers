@@ -1,21 +1,29 @@
-import React from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import SignatureCanvas from './SignatureCanvas';
+import type { SignatureSignee } from '../form/pages/types';
 
-export default function SignatureModal({ isOpen, onClose, onSave, signee }) {
+interface SignatureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (signatureDataURL: string, timestamp: Date, signee: SignatureSignee) => void;
+  signee: SignatureSignee;
+}
+
+export default function SignatureModal({ isOpen, onClose, onSave, signee }: SignatureModalProps) {
   if (!isOpen) return null;
 
-  const handleSave = (signatureDataURL, timestamp) => {
+  const handleSave = (signatureDataURL: string, timestamp: Date): void => {
     onSave(signatureDataURL, timestamp, signee);
     onClose();
   };
 
-  const handleBackdropClick = (e) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>): void => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
       onClose();
     }
@@ -46,7 +54,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, signee }) {
           </button>
         </div>
         <div className="p-6">
-          <SignatureCanvas onSave={handleSave} signee={signee} />
+          <SignatureCanvas onSave={handleSave} signeeType={signee} />
         </div>
       </div>
     </div>

@@ -1,6 +1,9 @@
-import React from 'react';
+interface FormProgressProps {
+  currentStep: number;
+  totalSteps: number;
+}
 
-export default function FormProgress({ currentStep, totalSteps }) {
+export default function FormProgress({ currentStep, totalSteps }: FormProgressProps) {
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
 
   return (

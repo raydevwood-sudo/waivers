@@ -1,9 +1,10 @@
-import React from 'react';
 import Checkbox from '../../ui/Checkbox';
 import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
+import type { FormPageProps } from './types';
 
-export default function WaiverPage1({ formData, onInputChange }) {
-  const fullName = `${formData.firstName} ${formData.lastName}`;
+type WaiverAgreementPageProps = Pick<FormPageProps, 'formData' | 'onInputChange'>;
+
+export default function WaiverPage1({ formData, onInputChange }: WaiverAgreementPageProps) {
   const introText = PASSENGER_WAIVER.introduction.template(
     formData.firstName || '[First Name]',
     formData.lastName || '[Last Name]',

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAppCheck, getToken, initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { getToken, initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -16,8 +16,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+let appCheck: AppCheck | null = null;
+
 if (recaptchaSiteKey) {
-  initializeAppCheck(app, {
+  appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(recaptchaSiteKey),
     isTokenAutoRefreshEnabled: true,
   });
@@ -30,11 +32,10 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 export async function getAppCheckToken(): Promise<string | null> {
-  if (!recaptchaSiteKey) {
+  if (!appCheck) {
     return null;
   }
 
-  const appCheck = getAppCheck(app);
   const tokenResult = await getToken(appCheck, false);
   return tokenResult.token;
 }

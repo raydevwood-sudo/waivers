@@ -1,8 +1,10 @@
-import React from 'react';
 import Checkbox from '../../ui/Checkbox';
 import { REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
+import type { FormPageProps } from './types';
 
-export default function InformedConsentPage5({ formData, onInputChange }) {
+type InformedConsentPageProps = Pick<FormPageProps, 'formData' | 'onInputChange'>;
+
+export default function InformedConsentPage5({ formData, onInputChange }: InformedConsentPageProps) {
   return (
     <div className="space-y-6">
       <div>

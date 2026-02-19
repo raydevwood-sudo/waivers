@@ -1,8 +1,10 @@
-import React from 'react';
 import Input from '../../ui/Input';
 import { PASSENGER_WAIVER, REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
+import type { FormPageProps } from './types';
 
-export default function SignaturePage({ formData, waiverType, onInputChange, onOpenSignature }) {
+type SignaturePageProps = Pick<FormPageProps, 'formData' | 'waiverType' | 'onInputChange' | 'onOpenSignature'>;
+
+export default function SignaturePage({ formData, waiverType, onInputChange, onOpenSignature }: SignaturePageProps) {
   const isRepresentative = waiverType === 'representative';
   const passengerFullName = `${formData.firstName} ${formData.lastName}`;
   const representativeFullName = isRepresentative 
@@ -65,7 +67,7 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
           
           {formData.passengerTimestamp && (
             <p className="text-xs text-gray-500">
-              Signed: {formData.passengerTimestamp.toLocaleString()}
+              Signed: {new Date(formData.passengerTimestamp).toLocaleString()}
             </p>
           )}
         </div>
@@ -106,7 +108,7 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
           
           {formData.witnessTimestamp && (
             <p className="text-xs text-gray-500">
-              Signed: {formData.witnessTimestamp.toLocaleString()}
+              Signed: {new Date(formData.witnessTimestamp).toLocaleString()}
             </p>
           )}
         </div>

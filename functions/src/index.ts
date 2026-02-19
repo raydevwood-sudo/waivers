@@ -3,10 +3,10 @@ import {onRequest} from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
 
 if (!admin.apps.length) {
-	admin.initializeApp();
+  admin.initializeApp();
 }
 
 type RawFormData = {
@@ -42,31 +42,49 @@ type SubmitWaiverRequest = {
 	pdfBase64: string;
 };
 
+/**
+ * Normalize epoch values in seconds/milliseconds into milliseconds.
+ * @param {number} value Timestamp as seconds or milliseconds
+ * @return {number} Timestamp in milliseconds
+ */
 function normalizeEpochToMillis(value: number): number {
-	return value < 100000000000 ? value * 1000 : value;
+  return value < 100000000000 ? value * 1000 : value;
 }
 
+/**
+ * Convert timestamp values to epoch milliseconds.
+ * @param {(string|number|undefined)} timestamp Timestamp input
+ * @return {(number|undefined)} Epoch timestamp in milliseconds
+ */
 function toEpochMillis(timestamp: string | number | undefined): number | undefined {
-	if (timestamp === undefined) return undefined;
+  if (timestamp === undefined) {
+    return undefined;
+  }
 
-	if (typeof timestamp === "string") {
-		const parsedNumber = Number(timestamp);
-		if (Number.isFinite(parsedNumber)) {
-			return normalizeEpochToMillis(parsedNumber);
-		}
+  if (typeof timestamp === "string") {
+    const parsedNumber = Number(timestamp);
+    if (Number.isFinite(parsedNumber)) {
+      return normalizeEpochToMillis(parsedNumber);
+    }
 
-		const parsedDate = Date.parse(timestamp);
-		return Number.isNaN(parsedDate) ? undefined : parsedDate;
-	}
+    const parsedDate = Date.parse(timestamp);
+    return Number.isNaN(parsedDate) ? undefined : parsedDate;
+  }
 
-	if (!Number.isFinite(timestamp)) return undefined;
-	return normalizeEpochToMillis(timestamp);
+  if (!Number.isFinite(timestamp)) {
+    return undefined;
+  }
+
+  return normalizeEpochToMillis(timestamp);
 }
 
 export const submitWaiverSecure = onRequest(async (req, res) => {
 	res.set("Access-Control-Allow-Origin", "*");
 	res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-	res.set("Access-Control-Allow-Headers", "Content-Type, X-Firebase-AppCheck");
+	res.set(
+		"Access-Control-Allow-Headers",
+		"Content-Type, X-Firebase-AppCheck"
+	);
 
 	if (req.method === "OPTIONS") {
 		res.status(204).send("");
@@ -99,7 +117,9 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
 
 		const passengerMillis = toEpochMillis(formData.passengerTimestamp);
 		if (passengerMillis === undefined) {
-			res.status(400).json({error: "Passenger signature timestamp is invalid"});
+			res.status(400).json({
+				error: "Passenger signature timestamp is invalid",
+			});
 			return;
 		}
 
@@ -117,7 +137,8 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
 		};
 
 		if (witnessMillis !== undefined) {
-			waiverData.witnessTimestamp = admin.firestore.Timestamp.fromMillis(witnessMillis);
+			waiverData.witnessTimestamp = admin.firestore.Timestamp
+				.fromMillis(witnessMillis);
 		}
 
 		const bucket = admin.storage().bucket();

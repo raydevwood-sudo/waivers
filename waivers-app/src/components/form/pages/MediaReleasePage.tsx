@@ -1,8 +1,10 @@
-import React from 'react';
 import Radio from '../../ui/Radio';
 import { PASSENGER_WAIVER, REPRESENTATIVE_WAIVER } from '../../../config/waiver-templates';
+import type { FormPageProps } from './types';
 
-export default function MediaReleasePage({ formData, waiverType, onInputChange }) {
+type MediaReleasePageProps = Pick<FormPageProps, 'formData' | 'waiverType' | 'onInputChange'>;
+
+export default function MediaReleasePage({ formData, waiverType, onInputChange }: MediaReleasePageProps) {
   const isRepresentative = waiverType === 'representative';
   const passengerFirstName = formData.firstName || 'the passenger';
   
@@ -12,17 +14,17 @@ export default function MediaReleasePage({ formData, waiverType, onInputChange }
     : PASSENGER_WAIVER.mediaReleaseSection;
   
   // Get option values - handle both string and function types
-  const fullConsentValue = isRepresentative && typeof mediaRelease.options.fullConsent === 'function'
-    ? mediaRelease.options.fullConsent(passengerFirstName)
-    : mediaRelease.options.fullConsent;
-    
-  const consentWithInitialsValue = isRepresentative && typeof mediaRelease.options.consentWithInitials === 'function'
-    ? mediaRelease.options.consentWithInitials(passengerFirstName)
-    : mediaRelease.options.consentWithInitials;
-    
-  const noConsentValue = isRepresentative && typeof mediaRelease.options.noConsent === 'function'
-    ? mediaRelease.options.noConsent(passengerFirstName)
-    : mediaRelease.options.noConsent;
+  const resolveMediaOption = (option: string | ((name: string) => string)): string => {
+    if (typeof option === 'function') {
+      return option(passengerFirstName);
+    }
+
+    return option;
+  };
+
+  const fullConsentValue = resolveMediaOption(mediaRelease.options.fullConsent);
+  const consentWithInitialsValue = resolveMediaOption(mediaRelease.options.consentWithInitials);
+  const noConsentValue = resolveMediaOption(mediaRelease.options.noConsent);
   
   // Labels for display
   const consentLabel = isRepresentative

@@ -1,8 +1,10 @@
-import React from 'react';
 import Checkbox from '../../ui/Checkbox';
 import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
+import type { FormPageProps } from './types';
 
-export default function WaiverPage4({ formData, onInputChange }) {
+type WaiverAgreementPageProps = Pick<FormPageProps, 'formData' | 'onInputChange'>;
+
+export default function WaiverPage4({ formData, onInputChange }: WaiverAgreementPageProps) {
   return (
     <div className="space-y-6">
       <div>

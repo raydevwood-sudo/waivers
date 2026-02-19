@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { downloadWaiverPDF } from '../services/pdf-generator.service';
+import { useState } from 'react';
 import type { WaiverSubmission } from '../types';
 
 interface SuccessPageProps {
@@ -12,6 +11,7 @@ export default function SuccessPage({ submission }: SuccessPageProps) {
   const handleDownloadPDF = async () => {
     setIsGenerating(true);
     try {
+      const { downloadWaiverPDF } = await import('../services/pdf-generator.service');
       await downloadWaiverPDF(submission);
     } catch (error) {
       console.error('Error generating PDF:', error);

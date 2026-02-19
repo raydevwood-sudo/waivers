@@ -1,7 +1,9 @@
-import React from 'react';
 import Input from '../../ui/Input';
+import type { FormPageProps } from './types';
 
-export default function PersonalInfoPage({ formData, waiverType, onInputChange }) {
+type PersonalInfoPageProps = Pick<FormPageProps, 'formData' | 'waiverType' | 'onInputChange'>;
+
+export default function PersonalInfoPage({ formData, waiverType, onInputChange }: PersonalInfoPageProps) {
   const isRepresentative = waiverType === 'representative';
 
   return (
@@ -42,7 +44,7 @@ export default function PersonalInfoPage({ formData, waiverType, onInputChange }
           value={formData.town}
           onChange={(e) => onInputChange('town', e.target.value)}
           autoComplete="address-level2"
-          minLength="3"
+          minLength={3}
           required
         />
       </div>
@@ -104,8 +106,8 @@ export default function PersonalInfoPage({ formData, waiverType, onInputChange }
             value={formData.phone}
             onChange={(e) => onInputChange('phone', e.target.value)}
             autoComplete="tel"
-            minLength="10"
-            maxLength="10"
+            minLength={10}
+            maxLength={10}
             required
           />
         </div>

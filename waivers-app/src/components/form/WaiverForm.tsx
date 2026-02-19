@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import FormProgress from './FormProgress';
 import FormNavigation from './FormNavigation';
 import SignatureModal from '../signature/SignatureModal';
+import type { FormData, WaiverType } from '../../types';
+import type { FormField, FormPageProps, LocalFormData, SignatureSignee } from './pages/types';
 
 // Import form pages (we'll create these next)
 import WaiverTypePage from './pages/WaiverTypePage';
@@ -19,7 +21,11 @@ import InformedConsentPage5 from './pages/InformedConsentPage5';
 import MediaReleasePage from './pages/MediaReleasePage';
 import SignaturePage from './pages/SignaturePage';
 
-const getTotalSteps = (waiverType) => {
+interface WaiverFormProps {
+  onSubmit: (formData: FormData) => void | Promise<void>;
+}
+
+const getTotalSteps = (): number => {
   // Both passengers and representatives have 9 steps
   // Passengers: Type(0) → Info(1) → Waiver1-5(2-6) → Media(7) → Sig(8)
   // Representatives: Type(0) → Info(1) → IC1-5(2-6) → Media(7) → Sig(8)
@@ -28,10 +34,10 @@ const getTotalSteps = (waiverType) => {
 
 const blankImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEU gAAASwAAACWCAYAAABkW7XSAAAAAXNSR0IArs4c6QAABGJJREFUeF7t1AEJAAAMAsHZv/RyPNwSyDncOQIECEQEFskpJgECBM5geQICBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAgQdWMQCX4yW9owAAAABJRU5ErkJggg==";
 
-export default function WaiverForm({ onSubmit }) {
+export default function WaiverForm({ onSubmit }: WaiverFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [waiverType, setWaiverType] = useState('passenger');
-  const [formData, setFormData] = useState({
+  const [waiverType, setWaiverType] = useState<WaiverType>('passenger');
+  const [formData, setFormData] = useState<LocalFormData>({
     // Personal Info
     firstName: '',
     lastName: '',
@@ -68,20 +74,26 @@ export default function WaiverForm({ onSubmit }) {
 
   const [signatureModal, setSignatureModal] = useState({
     isOpen: false,
-    signee: ''
+    signee: 'passenger' as SignatureSignee,
   });
 
-  const [validationErrors, setValidationErrors] = useState([]);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Reset media release when waiver type changes to update pronouns
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      mediaRelease: ''
-    }));
-  }, [waiverType]);
+  const handleWaiverTypeChange = (nextType: WaiverType): void => {
+    setWaiverType(nextType);
+    setFormData((prev) => {
+      if (prev.mediaRelease === '') {
+        return prev;
+      }
 
-  const handleInputChange = (field, value) => {
+      return {
+        ...prev,
+        mediaRelease: '',
+      };
+    });
+  };
+
+  const handleInputChange = (field: FormField, value: string | boolean): void => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear validation errors when user starts typing
     if (validationErrors.length > 0) {
@@ -89,39 +101,39 @@ export default function WaiverForm({ onSubmit }) {
     }
   };
 
-  const handleSignatureSave = (signatureDataURL, timestamp, signeeArg) => {
+  const handleSignatureSave = (signatureDataURL: string, timestamp: Date, signeeArg?: SignatureSignee): void => {
     const signee = signeeArg || signatureModal.signee;
     if (signee === 'passenger') {
       setFormData(prev => ({
         ...prev,
         passengerSignature: signatureDataURL,
-        passengerTimestamp: timestamp
+        passengerTimestamp: timestamp.getTime(),
       }));
     } else if (signee === 'witness') {
       setFormData(prev => ({
         ...prev,
         witnessSignature: signatureDataURL,
-        witnessTimestamp: timestamp
+        witnessTimestamp: timestamp.getTime(),
       }));
     }
   };
 
-  const openSignatureModal = (signee) => {
+  const openSignatureModal = (signee: SignatureSignee): void => {
     setSignatureModal({ isOpen: true, signee });
   };
 
-  const closeSignatureModal = () => {
-    setSignatureModal({ isOpen: false, signee: '' });
+  const closeSignatureModal = (): void => {
+    setSignatureModal({ isOpen: false, signee: 'passenger' });
   };
 
-  const getActualPageIndex = (step, waiverType) => {
+  const getActualPageIndex = (step: number): number => {
     // Both passengers and representatives follow the same 9-step flow
     return step;
   };
 
-  const validateCurrentStep = () => {
-    const errors = [];
-    const actualPage = getActualPageIndex(currentStep, waiverType);
+  const validateCurrentStep = (): boolean => {
+    const errors: string[] = [];
+    const actualPage = getActualPageIndex(currentStep);
     
     switch (actualPage) {
       case 0: // Waiver Type
@@ -144,7 +156,7 @@ export default function WaiverForm({ onSubmit }) {
         }
         if (!formData.phone.trim()) {
           errors.push('Phone number is required');
-        } else if (!/^\d{10}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+        } else if (!/^\d{10}$/.test(formData.phone.replace(/[\s\-()]/g, ''))) {
           errors.push('Please enter a valid 10-digit phone number');
         }
         if (!formData.town.trim()) {
@@ -259,13 +271,19 @@ export default function WaiverForm({ onSubmit }) {
     // Clear errors and proceed
     setValidationErrors([]);
 
-    if (currentStep === getTotalSteps(waiverType) - 1) {
+    if (currentStep === getTotalSteps() - 1) {
+      if (!formData.mediaRelease) {
+        setValidationErrors(['Please select a media release option']);
+        return;
+      }
+
       // Submit form
-      const submissionData = {
+      const submissionData: FormData = {
         ...formData,
         waiverType,
-        passengerTimestamp: formData.passengerTimestamp?.getTime(),
-        witnessTimestamp: formData.witnessTimestamp?.getTime(),
+        passengerTimestamp: formData.passengerTimestamp ?? Date.now(),
+        witnessTimestamp: formData.witnessTimestamp ?? undefined,
+        mediaRelease: formData.mediaRelease,
       };
       onSubmit(submissionData);
     } else {
@@ -281,15 +299,15 @@ export default function WaiverForm({ onSubmit }) {
   };
 
   const renderCurrentPage = () => {
-    const pageProps = {
+    const pageProps: FormPageProps = {
       formData,
       waiverType,
       onInputChange: handleInputChange,
-      onWaiverTypeChange: setWaiverType,
+      onWaiverTypeChange: handleWaiverTypeChange,
       onOpenSignature: openSignatureModal,
     };
 
-    const actualPage = getActualPageIndex(currentStep, waiverType);
+    const actualPage = getActualPageIndex(currentStep);
 
     switch (actualPage) {
       case 0:
@@ -329,17 +347,17 @@ export default function WaiverForm({ onSubmit }) {
     <div className="w-full max-w-3xl mx-auto px-4 py-6">
       {/* Screen reader announcements for page changes */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        Step {currentStep + 1} of {getTotalSteps(waiverType)}
+        Step {currentStep + 1} of {getTotalSteps()}
       </div>
       
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8" role="form" aria-label="Waiver form">
-        <FormProgress currentStep={currentStep} totalSteps={getTotalSteps(waiverType)} />
+        <FormProgress currentStep={currentStep} totalSteps={getTotalSteps()} />
         
         {renderCurrentPage()}
         
         <FormNavigation
           currentStep={currentStep}
-          totalSteps={getTotalSteps(waiverType)}
+          totalSteps={getTotalSteps()}
           onNext={handleNext}
           onPrevious={handlePrevious}
         />

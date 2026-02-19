@@ -1,4 +1,15 @@
-import React from 'react';
+import type { ChangeEvent } from 'react';
+
+interface RadioProps {
+  id: string;
+  name: string;
+  value: string;
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
+}
 
 export default function Radio({ 
   id,
@@ -9,7 +20,7 @@ export default function Radio({
   checked,
   onChange,
   className = ''
-}) {
+}: RadioProps) {
   return (
     <label 
       htmlFor={id} 
