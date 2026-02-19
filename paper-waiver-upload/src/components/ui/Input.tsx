@@ -3,7 +3,7 @@ import React from 'react';
 interface InputProps {
   id?: string;
   name?: string;
-  type?: 'text' | 'email' | 'tel' | 'number' | 'password';
+  type?: 'text' | 'email' | 'tel' | 'number' | 'password' | 'date';
   placeholder?: string;
   label?: string;
   value: string;

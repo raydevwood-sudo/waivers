@@ -2,6 +2,7 @@ import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 import type { User } from 'firebase/auth';
+import { overlayWaiverInfo } from './pdf-overlay.service';
 
 interface PaperWaiverData {
   waiverType: 'passenger' | 'representative';
@@ -14,7 +15,7 @@ interface PaperWaiverData {
   phone: string;
   mediaRelease: 'yes' | 'no';
   witnessName: string;
-  submittedDate: string;
+  signedDate: string;
   pdfFile: File | null;
 }
 
@@ -26,19 +27,26 @@ export async function uploadPaperWaiver(
     throw new Error('PDF file is required');
   }
 
-  const docId = crypto.randomUUID();
-  const pdfFilePath = `waivers/pdfs/${docId}.pdf`;
+  // Parse signed date
+  const signedDate = new Date(formData.signedDate);
+  const expiryDate = new Date(signedDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
   try {
-    // Upload PDF to Storage
-    const storageRef = ref(storage, pdfFilePath);
-    await uploadBytes(storageRef, formData.pdfFile);
-    const pdfUrl = await getDownloadURL(storageRef);
+    // Overlay waiver information on the PDF
+    const { modifiedPdf, waiverId } = await overlayWaiverInfo(
+      formData.pdfFile,
+      signedDate
+    );
 
-    // Parse submission date
-    const submittedDate = new Date(formData.submittedDate);
-    const expiryDate = new Date(submittedDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    // Use waiver ID as document ID
+    const docId = waiverId;
+    const pdfFilePath = `waivers/pdfs/${docId}.pdf`;
+
+    // Upload modified PDF to Storage
+    const storageRef = ref(storage, pdfFilePath);
+    await uploadBytes(storageRef, modifiedPdf);
+    const pdfUrl = await getDownloadURL(storageRef);
 
     // Create Firestore document
     const waiverData = {
@@ -59,7 +67,7 @@ export async function uploadPaperWaiver(
       // Witness and dates
       witnessName: formData.witnessName,
       mediaRelease: formData.mediaRelease,
-      submittedAt: Timestamp.fromDate(submittedDate),
+      submittedAt: Timestamp.fromDate(signedDate),
       
       // Agreement flags (set all to true for paper waivers)
       informedConsent1: true,
@@ -84,11 +92,14 @@ export async function uploadPaperWaiver(
       uploadedAt: Timestamp.now(),
       source: 'paper-upload',
       
+      // Waiver ID
+      waiverId: docId,
+      
       // Placeholder signatures (paper waiver has physical signatures)
       passengerSignature: 'paper-signature',
-      passengerTimestamp: Timestamp.fromDate(submittedDate),
+      passengerTimestamp: Timestamp.fromDate(signedDate),
       witnessSignature: 'paper-signature',
-      witnessTimestamp: Timestamp.fromDate(submittedDate),
+      witnessTimestamp: Timestamp.fromDate(signedDate),
     };
 
     await addDoc(collection(db, 'waivers'), waiverData);

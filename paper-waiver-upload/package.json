@@ -15,6 +15,7 @@
     "date-fns": "^4.1.0",
     "firebase": "^11.1.0",
     "jspdf": "^4.1.0",
+    "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.54.2",

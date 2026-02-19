@@ -17,7 +17,7 @@ interface FormData {
   phone: string;
   mediaRelease: 'yes' | 'no';
   witnessName: string;
-  submittedDate: string;
+  signedDate: string;
   pdfFile: File | null;
 }
 
@@ -34,7 +34,7 @@ export default function PaperWaiverUploadForm() {
     phone: '',
     mediaRelease: 'no',
     witnessName: '',
-    submittedDate: new Date().toISOString().split('T')[0],
+    signedDate: new Date().toISOString().split('T')[0],
     pdfFile: null,
   });
   const [uploading, setUploading] = useState(false);
@@ -93,7 +93,7 @@ export default function PaperWaiverUploadForm() {
         phone: '',
         mediaRelease: 'no',
         witnessName: '',
-        submittedDate: new Date().toISOString().split('T')[0],
+        signedDate: new Date().toISOString().split('T')[0],
         pdfFile: null,
       });
       // Reset file input
@@ -180,14 +180,14 @@ export default function PaperWaiverUploadForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 type="text"
-                label="First Name *"
+                label="First Name"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
                 required
               />
               <Input
                 type="text"
-                label="Last Name *"
+                label="Last Name"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
                 required
@@ -200,7 +200,7 @@ export default function PaperWaiverUploadForm() {
               />
               <Input
                 type="email"
-                label="Email *"
+                label="Email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
@@ -221,14 +221,14 @@ export default function PaperWaiverUploadForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   type="text"
-                  label="Representative First Name *"
+                  label="Representative First Name"
                   value={formData.representativeFirstName}
                   onChange={(e) => handleInputChange('representativeFirstName', e.target.value)}
                   required={formData.waiverType === 'representative'}
                 />
                 <Input
                   type="text"
-                  label="Representative Last Name *"
+                  label="Representative Last Name"
                   value={formData.representativeLastName}
                   onChange={(e) => handleInputChange('representativeLastName', e.target.value)}
                   required={formData.waiverType === 'representative'}
@@ -243,16 +243,16 @@ export default function PaperWaiverUploadForm() {
             <div className="space-y-4">
               <Input
                 type="text"
-                label="Witness Name *"
+                label="Witness Name"
                 value={formData.witnessName}
                 onChange={(e) => handleInputChange('witnessName', e.target.value)}
                 required
               />
               <Input
                 type="date"
-                label="Submission Date *"
-                value={formData.submittedDate}
-                onChange={(e) => handleInputChange('submittedDate', e.target.value)}
+                label="Date Signed"
+                value={formData.signedDate}
+                onChange={(e) => handleInputChange('signedDate', e.target.value)}
                 required
               />
               <div>
