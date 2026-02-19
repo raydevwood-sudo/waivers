@@ -14,9 +14,11 @@ import {
  * Generate a unique waiver ID
  */
 function generateWaiverId(): string {
-  const uuid = crypto.randomUUID();
-  const shortId = uuid.substring(0, 8).toUpperCase();
-  return `CWAS-PAS-${shortId}`;
+  const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  const bytes = new Uint8Array(10);
+  crypto.getRandomValues(bytes);
+  const shortId = Array.from(bytes).map((value) => alphabet[value % alphabet.length]).join('');
+  return `PAS-${shortId}`;
 }
 
 /**
@@ -179,14 +181,67 @@ export async function generateWaiverPDF(submission: WaiverSubmission): Promise<j
 
   // --- HEADER SECTION ---
   const headerTopY = yPos;
-  const infoBlockWidth = 65;
-  const infoBlockHeight = 22;
+  const infoBlockWidth = 60;
+  const infoLabelX = 2;
+  const infoValueX = 22;
+  const infoRightPadding = 2;
+  const infoLineStep = 4.2;
+  const infoRowGap = 1.2;
+  const infoTopPadding = 4;
+  const infoBottomPadding = 3;
   const infoBlockX = pageWidth - margin - infoBlockWidth;
   const infoBlockY = headerTopY;
   const titleLeftX = margin + logoSize + 6;
   const titleRightX = infoBlockX - 6;
   const titleWidth = Math.max(50, titleRightX - titleLeftX);
   const titleCenterX = titleLeftX + titleWidth / 2;
+
+  const infoFields = [
+    { label: 'Waiver ID:', value: waiverId, singleLine: true, minValueSize: 6 },
+    { label: 'Created:', value: formatDate(createdDate) },
+    { label: 'Expires:', value: formatDate(expiryDate) },
+  ];
+  const infoValueMaxWidth = infoBlockWidth - infoValueX - infoRightPadding;
+
+  const fitSingleLineValue = (
+    value: string,
+    initialSize: number,
+    minSize: number
+  ): number => {
+    doc.setFont('helvetica', 'normal');
+    let size = initialSize;
+
+    while (size > minSize) {
+      doc.setFontSize(size);
+      if (doc.getTextWidth(value) <= infoValueMaxWidth) {
+        break;
+      }
+      size -= 0.5;
+    }
+
+    return size;
+  };
+
+  const infoRows = infoFields.map((field) => {
+    let valueSize = 9;
+    let lines: string[];
+
+    if (field.singleLine) {
+      valueSize = fitSingleLineValue(field.value, 9, field.minValueSize ?? 6);
+      lines = [field.value];
+    } else {
+      lines = doc.splitTextToSize(field.value, infoValueMaxWidth) as string[];
+    }
+
+    return {
+      ...field,
+      valueSize,
+      lines,
+      rowHeight: Math.max(1, lines.length) * infoLineStep,
+    };
+  });
+  const infoContentHeight = infoRows.reduce((sum, row) => sum + row.rowHeight, 0) + (infoRows.length - 1) * infoRowGap;
+  const infoBlockHeight = infoTopPadding + infoContentHeight + infoBottomPadding;
 
   // Add organization logo (if available)
   let logoBottomY = headerTopY;
@@ -213,24 +268,21 @@ export async function generateWaiverPDF(submission: WaiverSubmission): Promise<j
 
   // Document info block (aligned in same header row)
   doc.setFontSize(9);
-  let infoLineY = infoBlockY + 6;
+  let infoLineY = infoBlockY + infoTopPadding + infoLineStep;
 
-  doc.setFont('helvetica', 'bold');
-  doc.text('Waiver ID:', infoBlockX + 2, infoLineY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(waiverId, infoBlockX + 27, infoLineY);
-  infoLineY += 5;
+  for (const row of infoRows) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(row.label, infoBlockX + infoLabelX, infoLineY);
 
-  doc.setFont('helvetica', 'bold');
-  doc.text('Created:', infoBlockX + 2, infoLineY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(formatDate(createdDate), infoBlockX + 27, infoLineY);
-  infoLineY += 5;
+    doc.setFontSize(row.valueSize);
+    doc.setFont('helvetica', 'normal');
+    row.lines.forEach((line, index) => {
+      doc.text(line, infoBlockX + infoValueX, infoLineY + (index * infoLineStep));
+    });
 
-  doc.setFont('helvetica', 'bold');
-  doc.text('Expires:', infoBlockX + 2, infoLineY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(formatDate(expiryDate), infoBlockX + 27, infoLineY);
+    infoLineY += row.rowHeight + infoRowGap;
+  }
 
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.3);

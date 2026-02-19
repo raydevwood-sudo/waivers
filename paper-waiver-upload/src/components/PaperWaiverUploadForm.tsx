@@ -145,12 +145,23 @@ export default function PaperWaiverUploadForm() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Successful!</h2>
               <p className="text-gray-600">The paper waiver has been processed and added to the system.</p>
             </div>
-            <button
-              onClick={() => setSuccess(false)}
-              className="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors"
-            >
-              Upload Another Waiver
-            </button>
+            <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="https://valid-waivers.web.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-primary hover:bg-primary-hover text-white font-medium rounded-xl transition-colors"
+                aria-label="Open Valid Waivers in a new tab to verify this upload"
+              >
+                Verify in Valid Waivers
+              </a>
+              <button
+                onClick={() => setSuccess(false)}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors"
+              >
+                Upload Another Waiver
+              </button>
+            </div>
           </div>
         )}
 

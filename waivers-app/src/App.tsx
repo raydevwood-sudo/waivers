@@ -9,9 +9,13 @@ import type { FormData, WaiverSubmission } from './types'
 interface SubmissionErrorState {
   message: string
   supportEmailHref: string
+  supportGmailHref: string
 }
 
-function buildSupportEmailHref(formData: FormData, errorMessage: string): string {
+function buildSupportLinks(formData: FormData, errorMessage: string): {
+  supportEmailHref: string
+  supportGmailHref: string
+} {
   const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'info@cyclingwithoutagesociety.org'
   const occurredAt = new Date().toISOString()
   const subject = 'Waiver Submission Support Request'
@@ -28,7 +32,13 @@ function buildSupportEmailHref(formData: FormData, errorMessage: string): string
     'Thank you.'
   ].join('\n')
 
-  return `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  const encodedSubject = encodeURIComponent(subject)
+  const encodedBody = encodeURIComponent(body)
+
+  return {
+    supportEmailHref: `mailto:${supportEmail}?subject=${encodedSubject}&body=${encodedBody}`,
+    supportGmailHref: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(supportEmail)}&su=${encodedSubject}&body=${encodedBody}`,
+  }
 }
 
 function App() {
@@ -55,9 +65,11 @@ function App() {
     } catch (error) {
       console.error('Submission failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Submission failed. Please try again later.';
+      const supportLinks = buildSupportLinks(formData, errorMessage)
       setSubmissionError({
         message: errorMessage,
-        supportEmailHref: buildSupportEmailHref(formData, errorMessage),
+        supportEmailHref: supportLinks.supportEmailHref,
+        supportGmailHref: supportLinks.supportGmailHref,
       })
     } finally {
       setIsSubmitting(false)
@@ -76,11 +88,16 @@ function App() {
               <p className="text-sm font-semibold text-red-800">Submission failed</p>
               <p className="text-sm text-red-700 mt-1">{submissionError.message}</p>
               <a
-                href={submissionError.supportEmailHref}
+                href={submissionError.supportGmailHref}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center mt-3 px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
               >
                 Send Support Email
               </a>
+              <p className="text-xs text-red-600 mt-2">
+                If this does not open your email, use this link: <a className="underline" href={submissionError.supportEmailHref}>mailto</a>
+              </p>
             </div>
           )}
           <WaiverForm onSubmit={handleSubmit} />

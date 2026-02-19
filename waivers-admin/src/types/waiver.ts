@@ -1,5 +1,6 @@
 export interface WaiverRecord {
   id: string;
+  waiverId?: string;
   waiverType: 'passenger' | 'representative';
   firstName: string;
   lastName: string;

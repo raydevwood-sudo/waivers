@@ -1,8 +1,36 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 import type { User } from 'firebase/auth';
 import { overlayWaiverInfo } from './pdf-overlay.service';
+
+const WAIVER_ID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const WAIVER_ID_LENGTH = 10;
+
+function generateWaiverId(): string {
+  const bytes = new Uint8Array(WAIVER_ID_LENGTH);
+  crypto.getRandomValues(bytes);
+
+  const idBody = Array.from(bytes)
+    .map((value) => WAIVER_ID_ALPHABET[value % WAIVER_ID_ALPHABET.length])
+    .join('');
+
+  return `PAS-${idBody}`;
+}
+
+async function generateUniqueWaiverId(maxAttempts: number = 5): Promise<string> {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const waiverId = generateWaiverId();
+    const waiverRef = doc(db, 'waivers', waiverId);
+    const waiverSnapshot = await getDoc(waiverRef);
+
+    if (!waiverSnapshot.exists()) {
+      return waiverId;
+    }
+  }
+
+  throw new Error('Could not generate a unique waiver ID. Please try again.');
+}
 
 interface PaperWaiverData {
   waiverType: 'passenger' | 'representative';
@@ -33,21 +61,22 @@ export async function uploadPaperWaiver(
   expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
   try {
+    const docId = await generateUniqueWaiverId();
+
     // Overlay waiver information on the PDF
-    const { modifiedPdf, waiverId } = await overlayWaiverInfo(
+    const { modifiedPdf } = await overlayWaiverInfo(
       formData.pdfFile,
       signedDate,
-      uploadedBy.email || 'Unknown'
+      uploadedBy.email || 'Unknown',
+      docId
     );
 
-    // Use waiver ID as document ID
-    const docId = waiverId;
     const pdfFilePath = `waivers/pdfs/${docId}.pdf`;
 
     // Upload modified PDF to Storage
     const storageRef = ref(storage, pdfFilePath);
     await uploadBytes(storageRef, modifiedPdf);
-    const pdfUrl = await getDownloadURL(storageRef);
+    await getDownloadURL(storageRef);
 
     // Create Firestore document
     const waiverData = {
@@ -103,7 +132,7 @@ export async function uploadPaperWaiver(
       witnessTimestamp: Timestamp.fromDate(signedDate),
     };
 
-    await addDoc(collection(db, 'waivers'), waiverData);
+    await setDoc(doc(db, 'waivers', docId), waiverData);
 
     return docId;
   } catch (error) {

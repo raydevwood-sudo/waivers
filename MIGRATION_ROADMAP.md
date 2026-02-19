@@ -55,9 +55,9 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4
 - **Backend:** Cloud Function `submitWaiverSecure` (Node.js 24, us-central1)
 
-#### 2. **Valid Waivers Admin Portal** (Authenticated)
+#### 2. **Valid Waivers App** (Authenticated)
 - **URL:** https://valid-waivers.web.app
-- **Purpose:** Staff portal for viewing and searching valid waivers
+- **Purpose:** Volunteer-facing app for viewing and searching valid waivers
 - **Status:** ✅ Fully operational
 - **Features:**
   - Google Sign-In authentication (any Google account)
@@ -87,6 +87,21 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth/Storage
 - **Final Step:** Add authorized domain `paper-waiver-upload.web.app` to Firebase Auth
 
+#### 4. **Admin Management App** (Planned)
+- **URL:** `admin-waivers.web.app` (proposed)
+- **Purpose:** Restricted app for managing platform settings and waiver versions
+- **Status:** 🟡 Planned
+- **MVP Scope:**
+  - Manage `waivers/settings` document
+  - Configure Valid Waivers access control (`open` / `restricted`, allowed emails, allowed domains)
+  - Manage waiver version metadata (passenger + representative version and effective date)
+  - Manage solution-level settings (organization display name, support email, feature flags)
+  - Change history fields (`updatedAt`, `updatedBy`)
+- **Out of Scope (MVP):**
+  - Full WYSIWYG clause editing
+  - Multi-step legal approval workflow
+  - Diff viewer and rollback UI
+
 ### Firebase Infrastructure
 
 #### Project Details
@@ -115,7 +130,7 @@ This document outlines the complete migration plan for the Waiver and Release of
   - Upload tracking (uploadedBy, uploadedById, uploadedAt, source) [paper waivers only]
 - **Security Rules:** 
   - Public write via Cloud Function only
-  - Authenticated read access for admin apps
+  - Authenticated read access for valid waiver verification apps
 
 #### Firebase Storage
 - **Path:** `waivers/pdfs/`
@@ -127,7 +142,6 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Authorized Domains:**
   - passenger-waivers.web.app
   - valid-waivers.web.app
-  - waivers-admin.web.app (legacy)
   - paper-waiver-upload.web.app (pending addition)
 
 ### Completed Migration Phases
@@ -172,7 +186,7 @@ This document outlines the complete migration plan for the Waiver and Release of
 
 #### ✅ Phase 6: Email Integration
 - Status: **Deferred** (not required for MVP)
-- PDFs accessible via admin portal instead
+- PDFs accessible via Valid Waivers app instead
 
 #### ✅ Phase 7: Integration & Data Flow
 - Complete submission pipeline working
@@ -184,14 +198,14 @@ This document outlines the complete migration plan for the Waiver and Release of
 - Local testing completed
 - Production deployment successful
 - End-to-end waiver submission verified
-- Admin portal viewing verified
+- Valid Waivers app viewing verified
 - Security rules validated
 
 ### Additional Features Beyond Original Scope
 
-#### Admin Portal ("Valid Waivers")
+#### Valid Waivers App
 - **Scope:** Not in original roadmap
-- **Delivered:** Full admin viewer with search, filter, sorting, and PDF viewing
+- **Delivered:** Full volunteer-facing viewer with search, filter, sorting, and PDF viewing
 - **Value:** Enables staff to quickly find and verify valid waivers without direct database access
 
 #### Paper Waiver Upload Tool
@@ -219,20 +233,22 @@ This document outlines the complete migration plan for the Waiver and Release of
 ### Outstanding Tasks
 
 1. ✅ **Passenger Waiver App** - Complete and operational
-2. ✅ **Admin Viewer** - Complete and operational
+2. ✅ **Valid Waivers App** - Complete and operational
 3. ⏳ **Paper Waiver Upload** - Deployed, needs auth domain added (1 min manual step)
 4. ❌ **Email Integration** - Deferred (not required for MVP)
-5. ❌ **Domain Custom URL** - Using Firebase subdomains (cyclingwithoutagesociety.org integration deferred)
+5. ❌ **Admin Management App** - Planned and not started
+6. ❌ **Domain Custom URL** - Using Firebase subdomains (cyclingwithoutagesociety.org integration deferred)
 
 ### Next Steps
 
 1. **Add paper-waiver-upload.web.app to Firebase Auth authorized domains** (1 min)
-2. **Train staff on Valid Waivers admin portal** (viewing/searching)
+2. **Train volunteers on Valid Waivers app** (viewing/searching)
 3. **Train staff on Paper Waiver Upload tool** (manual data entry)
-4. **Monitor Cloud Function usage and costs**
-5. **Future: Enable App Check with ReCaptcha for spam protection** (optional)
-6. **Future: Add email delivery via SendGrid** (optional enhancement)
-7. **Future: Custom domain setup** (cyclingwithoutagesociety.org redirect)
+4. **Build Admin Management App MVP** (settings + access control + version metadata)
+5. **Monitor Cloud Function usage and costs**
+6. **Future: Enable App Check with ReCaptcha for spam protection** (optional)
+7. **Future: Add email delivery via SendGrid** (optional enhancement)
+8. **Future: Custom domain setup** (cyclingwithoutagesociety.org redirect)
 
 ### Repository Information
 
@@ -2139,190 +2155,93 @@ Potential features to consider:
 - QR code for easy form access
 - Offline form completion (PWA)
 
-#### **Priority Enhancement: Waiver Template Editor App**
+#### **Priority Enhancement: Admin Management App (Settings + Governance)**
 
-A dedicated editor application for managing waiver content templates, enabling non-technical users to update waiver clauses, versioning, and content without code changes.
+A dedicated restricted application for operational administration of the waiver platform.
 
 **Purpose:**
-- Centralized management of waiver content and clauses
-- Version control for legal content changes
-- Audit trail for content modifications
-- Preview PDF output before publishing
-- Rollback capability to previous versions
+- Central place to manage runtime settings without code changes
+- Control who can access Valid Waivers
+- Manage waiver version metadata used by submission/upload flows
+- Provide traceable updates with `updatedAt` and `updatedBy`
+
+**MVP Scope (Phase 1):**
+1. **Settings Management**
+   - Edit `waivers/settings.solutionSettings`
+   - Organization name, support email, feature toggles
+2. **Access Control Management**
+   - Edit `waivers/settings.accessControl.validWaivers`
+   - `mode`: `open` / `restricted`
+   - `allowedEmails` (for Gmail and individual users)
+   - `allowedEmailDomains` (for organization-wide access)
+3. **Waiver Version Management**
+   - Edit `waivers/settings.waiverVersions.passenger`
+   - Edit `waivers/settings.waiverVersions.representative`
+   - Version string + effective date
+4. **Audit Metadata**
+   - Persist `updatedAt` (server timestamp)
+   - Persist `updatedBy` (authenticated admin email)
 
 **Technical Architecture:**
-- **Separate React Application** - Standalone admin app in the repository
-- **Firebase Authentication** - Admin-only access control
-- **Firestore Database** - Store template versions and history
-- **Real-time Preview** - Live PDF preview using the PDF generator service
-- **Version Management** - Track all changes with timestamps and authors
+- **Separate React App** in repository (proposed folder: `waivers-admin-app/`)
+- **Firebase Auth (Google)** with restricted allowlist/domain policy
+- **Firestore** as source of truth (`waivers/settings`)
+- **Form-based UI** with explicit Save/Cancel actions
 
-**Key Features:**
-1. **Template Editor Interface**
-   - WYSIWYG editor for waiver clauses
-   - Section management (add/remove/reorder clauses)
-  - Support for both individual and legal representative waivers
-   - Rich text formatting capabilities
-   - Template variable management (e.g., `{{firstName}}`, `{{town}}`)
-
-2. **Version Control System**
-   - Semantic versioning (v1.0, v1.1, v2.0)
-   - Version history with diff viewer
-   - Rollback to previous versions
-   - Draft/Published states
-   - Effective date management
-
-3. **Preview & Testing**
-   - Real-time PDF preview with sample data
-   - Side-by-side comparison of versions
-   - Test data sets for validation
-   - Mobile/Desktop preview modes
-
-4. **Audit & Compliance**
-   - Full change history log
-   - User attribution for all changes
-   - Approval workflow (optional)
-   - Export audit logs
-   - Legal annotations and notes
-
-5. **Publishing Workflow**
-   - Review changes before publishing
-   - Set effective dates for new versions
-   - Automatic migration of waiver-templates.ts
-   - Notification system for content changes
-   - Staging/Production environment support
-
-**Implementation Approach:**
-
-```
-/waivers
-├── waivers-app/          # Main waiver submission app
-├── editor-app/           # NEW: Template editor app
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── editor/
-│   │   │   │   ├── ClauseEditor.tsx
-│   │   │   │   ├── TemplateEditor.tsx
-│   │   │   │   ├── VersionManager.tsx
-│   │   │   │   └── PDFPreview.tsx
-│   │   │   ├── auth/
-│   │   │   │   └── AdminAuth.tsx
-│   │   │   └── ui/
-│   │   ├── services/
-│   │   │   ├── template.service.ts
-│   │   │   └── version.service.ts
-│   │   └── config/
-│   │       └── firebase.ts
-│   └── README.md
-├── functions/            # Shared functions
-└── shared/              # NEW: Shared code between apps
-    └── waiver-templates/ # Template definitions
-```
-
-**Firestore Schema for Template Management:**
+**Proposed Firestore Model (MVP):**
 
 ```typescript
-// Collection: waiver_templates
+// Document: waivers/settings
 {
-  id: "v1.0",
-  version: "v1.0",
-  versionDate: "2024-05-28",
-  status: "published" | "draft",
-  effectiveDate: "2024-05-28",
-  waiverType: "passenger" | "representative",
-  content: {
-    title: "...",
-    introduction: {
-      template: "...",
-      variables: ["firstName", "lastName", "town"]
-    },
-    sections: [
-      {
-        id: "waiver_section",
-        title: "Waiver of Liability",
-        clauses: ["...", "...", "..."]
-      },
-      {
-        id: "media_release",
-        title: "Media Release",
-        description: "...",
-        options: {
-          fullConsent: "...",
-          consentWithInitials: "...",
-          noConsent: "..."
-        }
-      }
-    ]
+  docType: "settings",
+  schemaVersion: 3,
+  solutionSettings: {
+    organizationName: string,
+    supportEmail: string,
+    enablePassengerWaiverApp: boolean,
+    enablePaperWaiverUpload: boolean
   },
-  metadata: {
-    createdBy: "admin@cwas.org",
-    createdAt: timestamp,
-    modifiedBy: "admin@cwas.org",
-    modifiedAt: timestamp,
-    notes: "Updated liability clause per legal review"
-  }
-}
-
-// Collection: template_history
-{
-  id: auto,
-  templateId: "v1.0",
-  action: "created" | "updated" | "published" | "rolled_back",
-  changes: {
-    field: "sections.waiver_section.clauses[2]",
-    oldValue: "...",
-    newValue: "..."
+  waiverVersions: {
+    passenger: { version: string, effectiveDate: string },
+    representative: { version: string, effectiveDate: string }
   },
-  performedBy: "admin@cwas.org",
-  performedAt: timestamp
+  accessControl: {
+    validWaivers: {
+      mode: "open" | "restricted",
+      allowedEmails: string[],
+      allowedEmailDomains: string[]
+    }
+  },
+  updatedAt: timestamp,
+  updatedBy: string
 }
 ```
 
-**Development Phases:**
+**Implementation Plan:**
 
-**Phase 1: Basic Editor (1-2 weeks)**
-- Authentication and authorization
-- Basic text editor for clauses
-- Save/Load templates from Firestore
-- Simple version numbering
+**Phase A (1 week): Foundation**
+- Create app scaffold and routing
+- Google sign-in + admin gating
+- Load and display current settings
 
-**Phase 2: Version Control (1 week)**
-- Version history display
-- Diff viewer
-- Rollback functionality
-- Audit logging
+**Phase B (1 week): Settings Editor MVP**
+- Build sections: Solution Settings, Access Control, Waiver Versions
+- Validation and save workflow
+- Optimistic UI + error handling
 
-**Phase 3: PDF Preview (1 week)**
-- Integration with PDF generator
-- Real-time preview
-- Test data management
-- Version comparison preview
+**Phase C (0.5 week): Audit + Hardening**
+- Write `updatedAt`/`updatedBy`
+- Permission checks and guardrails
+- End-to-end verification with valid-waivers behavior
 
-**Phase 4: Publishing Workflow (1 week)**
-- Draft/Published state management
-- Effective date handling
-- Code generation for waiver-templates.ts
-- Notification system
+**Phase D (Optional): Advanced Admin Features**
+- Full waiver text/template editor
+- Version history and rollback
+- Draft/publish workflow
 
-**Phase 5: Advanced Features (Optional)**
-- Approval workflows
-- Multi-user collaboration
-- Rich text editor with formatting
-- Template variable management UI
-- Export/Import templates
-
-**Benefits:**
-- ✅ Legal team can update content without developer involvement
-- ✅ Complete audit trail for compliance
-- ✅ Version control prevents accidental content loss
-- ✅ Preview ensures no formatting issues before publishing
-- ✅ Rollback capability for quick error recovery
-- ✅ Centralized single source of truth
-- ✅ Reduced deployment friction for content changes
-
-**Estimated Effort:** 4-6 weeks for full implementation  
-**Priority:** Medium-High (after main waiver system is stable)  
-**Dependencies:** Main waiver app must be deployed first
+**Estimated Effort (MVP):** 2.5 weeks  
+**Priority:** High  
+**Dependencies:** Existing settings document and valid-waivers access enforcement already in place
 
 ---
 
@@ -2385,7 +2304,7 @@ npm run deploy       # Deploy functions
 
 **Migration Summary:**
 - ✅ Passenger waiver submission app (passenger-waivers.web.app) - LIVE
-- ✅ Valid waivers admin portal (valid-waivers.web.app) - LIVE  
+- ✅ Valid Waivers app (valid-waivers.web.app) - LIVE  
 - ✅ Paper waiver upload tool (paper-waiver-upload.web.app) - DEPLOYED
 - 🚀 All core functionality operational
-- 📊 Enhanced with admin features beyond original scope
+- 📊 Enhanced with volunteer verification features beyond original scope

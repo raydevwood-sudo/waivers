@@ -1,6 +1,6 @@
-# Waiver and Release of Liability App
+# Valid Waivers App
 
-A modern, accessible waiver form application built with React, TypeScript, and Firebase.
+A modern, accessible volunteer-facing waiver verification application built with React, TypeScript, and Firebase.
 
 ## Features
 
@@ -24,7 +24,7 @@ A modern, accessible waiver form application built with React, TypeScript, and F
 
 1. **Clone the repository and install dependencies:**
    ```bash
-   cd waivers-app
+   cd waivers-admin
    npm install
    ```
 
@@ -117,7 +117,7 @@ This application meets WCAG 2.1 Level AA standards:
 
 ## Firebase Integration
 
-The app stores all waiver submissions in Firebase Firestore. Each submission includes:
+The app reads waiver submissions from Firebase Firestore. Each submission includes:
 
 - Participant information
 - Waiver agreement acknowledgments

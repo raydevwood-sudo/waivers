@@ -1,5 +1,19 @@
 import type { FormData, WaiverSubmission } from '../types';
 
+const WAIVER_ID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const WAIVER_ID_LENGTH = 10;
+
+function generateWaiverId(): string {
+  const bytes = new Uint8Array(WAIVER_ID_LENGTH);
+  crypto.getRandomValues(bytes);
+
+  const idBody = Array.from(bytes)
+    .map((value) => WAIVER_ID_ALPHABET[value % WAIVER_ID_ALPHABET.length])
+    .join('');
+
+  return `PAS-${idBody}`;
+}
+
 function normalizeEpochToMillis(value: number): number {
   return value < 100000000000 ? value * 1000 : value;
 }
@@ -112,20 +126,6 @@ export async function submitWaiver(formData: FormData): Promise<{ docId: string;
       throw new Error('Passenger signature timestamp is missing or invalid.');
     }
 
-    const docId = crypto.randomUUID();
-    const submission = convertFormDataToSubmission(formData, docId);
-    const pdfBase64 = await pdfToBase64(submission);
-
-    const securePayload = {
-      docId,
-      formData: {
-        ...formData,
-        passengerTimestamp: passengerMillis,
-        witnessTimestamp: toEpochMillis(formData.witnessTimestamp),
-      },
-      pdfBase64,
-    };
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -133,26 +133,48 @@ export async function submitWaiver(formData: FormData): Promise<{ docId: string;
       headers['X-Firebase-AppCheck'] = appCheckToken;
     }
 
-    const response = await fetch(getSubmitWaiverEndpoint(), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(securePayload),
-    });
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const docId = generateWaiverId();
+      const submission = convertFormDataToSubmission(formData, docId);
+      const pdfBase64 = await pdfToBase64(submission);
 
-    if (!response.ok) {
-      throw new Error('Secure waiver submission failed.');
+      const securePayload = {
+        docId,
+        formData: {
+          ...formData,
+          passengerTimestamp: passengerMillis,
+          witnessTimestamp: toEpochMillis(formData.witnessTimestamp),
+        },
+        pdfBase64,
+      };
+
+      const response = await fetch(getSubmitWaiverEndpoint(), {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(securePayload),
+      });
+
+      if (response.status === 409) {
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error('Secure waiver submission failed.');
+      }
+
+      const responseJson = await response.json() as {
+        docId: string;
+        pdfStoragePath?: string;
+        pdfFilePath?: string;
+      };
+
+      submission.pdfStoragePath = responseJson.pdfStoragePath;
+      submission.pdfFilePath = responseJson.pdfFilePath;
+
+      return { docId: responseJson.docId || docId, submission };
     }
 
-    const responseJson = await response.json() as {
-      docId: string;
-      pdfStoragePath?: string;
-      pdfFilePath?: string;
-    };
-
-    submission.pdfStoragePath = responseJson.pdfStoragePath;
-    submission.pdfFilePath = responseJson.pdfFilePath;
-
-    return { docId: responseJson.docId || docId, submission };
+    throw new Error('Could not generate a unique waiver ID. Please try again.');
   } catch (error) {
     console.error('Error submitting waiver:', error);
     throw new Error('Failed to submit waiver. Please try again.');

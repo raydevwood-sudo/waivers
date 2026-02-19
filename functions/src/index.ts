@@ -101,12 +101,9 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
   try {
     const appCheckToken = req.header("X-Firebase-AppCheck");
     if (appCheckToken) {
-      try {
-        await admin.appCheck().verifyToken(appCheckToken);
-      } catch (error) {
-        logger.warn("App Check verification failed", error);
-        // Continue anyway for development
-      }
+      await admin.appCheck().verifyToken(appCheckToken);
+    } else {
+      logger.warn("submitWaiverSecure: missing App Check token");
     }
 
     const body = req.body as SubmitWaiverRequest;
@@ -128,15 +125,15 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
     }
 
     const witnessMillis = toEpochMillis(formData.witnessTimestamp);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {
-      passengerTimestamp,
-      witnessTimestamp,
-      ...formDataWithoutRawTimestamps
-    } = formData;
+    const formDataWithoutRawTimestamps: Record<string, unknown> = {
+      ...formData,
+    };
+    delete formDataWithoutRawTimestamps.passengerTimestamp;
+    delete formDataWithoutRawTimestamps.witnessTimestamp;
 
     const waiverData: Record<string, unknown> = {
       ...formDataWithoutRawTimestamps,
+      waiverId: docId,
       passengerTimestamp: admin.firestore.Timestamp.fromMillis(passengerMillis),
       submittedAt: admin.firestore.Timestamp.now(),
     };
@@ -165,7 +162,7 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
     waiverData.pdfStoragePath = `gs://${bucket.name}/${pdfFilePath}`;
     waiverData.pdfGeneratedAt = admin.firestore.Timestamp.now();
 
-    await admin.firestore().collection("waivers").doc(docId).set(waiverData);
+    await admin.firestore().collection("waivers").doc(docId).create(waiverData);
 
     res.status(200).json({
       success: true,
@@ -174,6 +171,11 @@ export const submitWaiverSecure = onRequest(async (req, res) => {
       pdfStoragePath: waiverData.pdfStoragePath,
     });
   } catch (error) {
+    if ((error as { code?: number }).code === 6) {
+      res.status(409).json({error: "Waiver ID already exists"});
+      return;
+    }
+
     logger.error("submitWaiverSecure failed", error as Error);
     res.status(500).json({error: "Failed to submit waiver"});
   }
