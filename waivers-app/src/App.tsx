@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout'
 import WaiverForm from './components/form/WaiverForm'
 import SuccessPage from './components/SuccessPage'
 import Loader from './components/ui/Loader'
+import { TemplateProvider, useTemplates } from './context/TemplateContext'
 import { submitWaiver, isFirebaseConfigured } from './services/waiver.service'
 import type { FormData, WaiverSubmission } from './types'
 
@@ -42,6 +43,15 @@ function buildSupportLinks(formData: FormData, errorMessage: string): {
 }
 
 function App() {
+  return (
+    <TemplateProvider>
+      <AppContent />
+    </TemplateProvider>
+  )
+}
+
+function AppContent() {
+  const { passengerTemplate, representativeTemplate } = useTemplates();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
   const [submissionData, setSubmissionData] = useState<WaiverSubmission | null>(null)
@@ -56,8 +66,23 @@ function App() {
         throw new Error('Firebase is not properly configured. Please check your environment variables.');
       }
 
-      // Submit to Firestore
-      const { docId, submission } = await submitWaiver(formData);
+      // Get the appropriate template based on waiver type
+      const templateRecord = formData.waiverType === 'passenger' ? passengerTemplate : representativeTemplate;
+      if (!templateRecord) {
+        throw new Error('Template not loaded. Please try again.');
+      }
+
+      // Extract only the fields needed for PDF generation (avoid Firestore timestamps)
+      const template = {
+        title: templateRecord.title,
+        waiverType: templateRecord.waiverType,
+        version: templateRecord.version,
+        effectiveDate: templateRecord.effectiveDate,
+        blocks: templateRecord.blocks,
+      };
+
+      // Submit to Firestore with template data
+      const { docId, submission } = await submitWaiver(formData, template);
       console.log('Waiver submitted successfully with ID:', docId);
       
       setSubmissionData(submission);

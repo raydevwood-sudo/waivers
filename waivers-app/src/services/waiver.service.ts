@@ -36,15 +36,21 @@ function toEpochMillis(timestamp?: string | number): number | undefined {
 }
 
 async function pdfToBase64(submission: WaiverSubmission): Promise<string> {
-  const { generateWaiverPDF } = await import('./pdf-generator.service');
-  const pdf = await generateWaiverPDF(submission);
-  const dataUri = pdf.output('datauristring');
-  const commaIndex = dataUri.indexOf(',');
-  if (commaIndex === -1) {
-    throw new Error('Failed to encode PDF payload.');
-  }
+  try {
+    console.log('Generating PDF with template:', submission.template?.title);
+    const { generateWaiverPDF } = await import('./pdf-generator.service');
+    const pdf = await generateWaiverPDF(submission);
+    const dataUri = pdf.output('datauristring');
+    const commaIndex = dataUri.indexOf(',');
+    if (commaIndex === -1) {
+      throw new Error('Failed to encode PDF payload.');
+    }
 
-  return dataUri.slice(commaIndex + 1);
+    return dataUri.slice(commaIndex + 1);
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 function getSubmitWaiverEndpoint(): string {
@@ -60,7 +66,11 @@ function getSubmitWaiverEndpoint(): string {
 /**
  * Convert FormData to WaiverSubmission format for PDF generation
  */
-function convertFormDataToSubmission(formData: FormData, docId: string): WaiverSubmission {
+function convertFormDataToSubmission(
+  formData: FormData, 
+  docId: string,
+  template?: import('../types').WaiverTemplate
+): WaiverSubmission {
   const now = new Date().toISOString();
   const expiryDate = new Date();
   expiryDate.setFullYear(expiryDate.getFullYear() + 1); // 1 year expiry
@@ -70,6 +80,7 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
     createdAt: now,
     expiryDate: expiryDate.toISOString(),
     waiverType: formData.waiverType,
+    template, // Include dynamic template data
     passenger: {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -113,12 +124,23 @@ function convertFormDataToSubmission(formData: FormData, docId: string): WaiverS
 /**
  * Submit a waiver form to Firestore
  * @param formData - The form data to submit
+ * @param template - The dynamic template data for PDF generation
  * @returns Object containing the document ID and structured submission data for PDF generation
  */
-export async function submitWaiver(formData: FormData): Promise<{ docId: string; submission: WaiverSubmission }> {
+export async function submitWaiver(
+  formData: FormData,
+  template?: import('../types').WaiverTemplate
+): Promise<{ docId: string; submission: WaiverSubmission }> {
   try {
-    const { getAppCheckToken } = await import('../config/firebase');
-    const appCheckToken = await getAppCheckToken();
+    // Try to get App Check token, but continue without it if it fails
+    let appCheckToken: string | null = null;
+    try {
+      const { getAppCheckToken } = await import('../config/firebase');
+      appCheckToken = await getAppCheckToken();
+    } catch (appCheckError) {
+      console.warn('Failed to get App Check token, continuing without it:', appCheckError);
+      // Continue without App Check token
+    }
 
     // Validate timestamp payload before secure submit
     const passengerMillis = toEpochMillis(formData.passengerTimestamp);
@@ -135,8 +157,11 @@ export async function submitWaiver(formData: FormData): Promise<{ docId: string;
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const docId = generateWaiverId();
-      const submission = convertFormDataToSubmission(formData, docId);
+      const submission = convertFormDataToSubmission(formData, docId, template);
+      console.log('Submission data prepared for docId:', docId);
+      
       const pdfBase64 = await pdfToBase64(submission);
+      console.log('PDF generated, size:', pdfBase64.length, 'chars');
 
       const securePayload = {
         docId,
@@ -148,18 +173,24 @@ export async function submitWaiver(formData: FormData): Promise<{ docId: string;
         pdfBase64,
       };
 
+      console.log('Sending to endpoint:', getSubmitWaiverEndpoint());
       const response = await fetch(getSubmitWaiverEndpoint(), {
         method: 'POST',
         headers,
         body: JSON.stringify(securePayload),
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.status === 409) {
+        console.log('Waiver ID conflict, retrying...');
         continue;
       }
 
       if (!response.ok) {
-        throw new Error('Secure waiver submission failed.');
+        const errorText = await response.text();
+        console.error('Server error:', errorText);
+        throw new Error(`Secure waiver submission failed: ${response.status} ${errorText}`);
       }
 
       const responseJson = await response.json() as {

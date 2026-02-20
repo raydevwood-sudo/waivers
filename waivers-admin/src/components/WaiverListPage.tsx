@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { subscribeWaivers, filterWaivers, getPdfDownloadUrl } from '../services/waiver-viewer.service';
 import type { WaiverRecord } from '../types/waiver';
 import Loader from './ui/Loader';
 import Input from './ui/Input';
 import Checkbox from './ui/Checkbox';
+import SettingsManager from './SettingsManager';
+import TemplateManager from './TemplateManager';
 
 export default function WaiverListPage() {
   const { user } = useAuth();
@@ -23,6 +25,20 @@ export default function WaiverListPage() {
 
   const passengerWaiversUrl = 'https://passenger-waivers.web.app';
   const waiverUploadUrl = 'https://waiver-upload.web.app';
+
+  const canAccessAdminTools = useMemo(() => {
+    const configuredEmails = (import.meta.env.VITE_WAIVERS_ADMIN_EMAILS as string | undefined)
+      ?.split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean) ?? [];
+
+    const userEmail = user?.email?.trim().toLowerCase();
+    if (!userEmail) {
+      return false;
+    }
+
+    return configuredEmails.includes(userEmail);
+  }, [user?.email]);
 
   useEffect(() => {
     setLoading(true);
@@ -112,10 +128,6 @@ export default function WaiverListPage() {
     const expiry = new Date(submittedAt);
     expiry.setFullYear(expiry.getFullYear() + 1);
     return expiry;
-  };
-
-  const isExpired = (submittedAt: Date): boolean => {
-    return getExpiryDate(submittedAt) < new Date();
   };
 
   const handleSort = (field: 'firstName' | 'lastName' | 'expiry') => {
@@ -298,6 +310,9 @@ export default function WaiverListPage() {
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {canAccessAdminTools && <SettingsManager userEmail={user?.email} />}
+        {canAccessAdminTools && <TemplateManager userEmail={user?.email} />}
+
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -311,6 +326,7 @@ export default function WaiverListPage() {
             <div className="flex items-center">
               <Checkbox
                 id="validOnly"
+                name="validOnly"
                 checked={validOnly}
                 onChange={(e) => setValidOnly(e.target.checked)}
                 label="Show valid waivers only"

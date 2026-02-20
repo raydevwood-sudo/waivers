@@ -1,8 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { WaiverSubmission } from '../types';
+import { interpolateTemplate } from './template.service';
 import {
-  PASSENGER_WAIVER,
-  REPRESENTATIVE_WAIVER,
   getDocumentVersion,
   ORGANIZATION_NAME,
   ORGANIZATION_LOGO_URL,
@@ -176,8 +175,27 @@ export async function generateWaiverPDF(submission: WaiverSubmission): Promise<j
   const logoDataUrl = await getOrganizationLogoDataUrl();
   const logoSize = 12;
 
-  // Get waiver content based on type
-  const waiverContent = isRepresentative ? REPRESENTATIVE_WAIVER : PASSENGER_WAIVER;
+  // Use dynamic template if available, otherwise fall back to hardcoded templates
+  const usesDynamicTemplate = submission.template && submission.template.blocks && submission.template.blocks.length > 0;
+  
+  console.log('PDF Generator - usesDynamicTemplate:', usesDynamicTemplate);
+  console.log('PDF Generator - template blocks:', submission.template?.blocks?.length || 0);
+  
+  // Prepare interpolation parameters
+  const interpolationParams = {
+    firstName: submission.passenger.firstName,
+    lastName: submission.passenger.lastName,
+    town: submission.passenger.town,
+    representativeFirstName: submission.representative?.firstName || '',
+    representativeLastName: submission.representative?.lastName || '',
+  };
+
+  // Get title from template
+  const documentTitle = usesDynamicTemplate && submission.template
+    ? submission.template.title 
+    : (isRepresentative ? 'Representative Waiver' : 'Passenger Waiver');
+  
+  console.log('PDF Generator - documentTitle:', documentTitle);
 
   // --- HEADER SECTION ---
   const headerTopY = yPos;
@@ -262,7 +280,7 @@ export async function generateWaiverPDF(submission: WaiverSubmission): Promise<j
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  const titleLines = doc.splitTextToSize(waiverContent.title, titleWidth);
+  const titleLines = doc.splitTextToSize(documentTitle, titleWidth);
   doc.text(titleLines, titleCenterX, headerTopY + 13, { align: 'center' });
   const titleBottomY = headerTopY + 13 + (titleLines.length - 1) * 5;
 
@@ -299,102 +317,109 @@ export async function generateWaiverPDF(submission: WaiverSubmission): Promise<j
 
   // --- INTRODUCTION PARAGRAPH ---
   doc.setFontSize(9);
-  let introText = '';
-  let introPrefix = '';
-  let sectionTitle = '';
-  let clauses: string[] = [];
   
-  if (isRepresentative && submission.representative) {
-    introPrefix = `I, ${submission.representative.firstName} ${submission.representative.lastName}, the undersigned, attest that I am the Legal Guardian/Power of Attorney of ${submission.passenger.firstName} ${submission.passenger.lastName} of the town of ${submission.passenger.town},`;
-    introText = REPRESENTATIVE_WAIVER.introduction.template(
-      submission.representative.firstName,
-      submission.representative.lastName,
-      submission.passenger.firstName,
-      submission.passenger.lastName,
-      submission.passenger.town
-    );
-    sectionTitle = REPRESENTATIVE_WAIVER.informedConsentSection.title;
-    clauses = REPRESENTATIVE_WAIVER.informedConsentSection.clauses;
-  } else {
-    introPrefix = `I, ${submission.passenger.firstName} ${submission.passenger.lastName} of the town of ${submission.passenger.town},`;
-    introText = PASSENGER_WAIVER.introduction.template(
-      submission.passenger.firstName,
-      submission.passenger.lastName,
-      submission.passenger.town
-    );
-    sectionTitle = PASSENGER_WAIVER.waiverSection.title;
-    clauses = PASSENGER_WAIVER.waiverSection.clauses;
-  }
+  console.log('PDF Generator - Rendering content...');
   
-  const introBody = introText.startsWith(introPrefix)
-    ? introText.slice(introPrefix.length).trimStart()
-    : introText;
-
-  if (introText.startsWith(introPrefix)) {
-    addText(introPrefix, 9, true);
-    if (introBody) {
-      addText(introBody, 9);
+  if (usesDynamicTemplate && submission.template) {
+    console.log('PDF Generator - Using dynamic template');
+    // Use dynamic template blocks
+    const introBlock = submission.template.blocks.find(b => b.id.includes('introduction') || b.id.includes('intro'));
+    console.log('PDF Generator - introBlock found:', !!introBlock);
+    if (introBlock) {
+      const introText = interpolateTemplate(introBlock.templateText, interpolationParams);
+      addText(introText, 9);
+      yPos += 3;
     }
+
+    // --- WAIVER/INFORMED CONSENT CLAUSES SECTION ---
+    // Find title block (usually the second block)
+    const titleBlock = submission.template.blocks.find(b => b.id.includes('title'));
+    console.log('PDF Generator - titleBlock found:', !!titleBlock);
+    if (titleBlock) {
+      addText(titleBlock.label, 10.5, true);
+      yPos += 2;
+    }
+
+    // Render clause blocks
+    const clauseBlocks = submission.template.blocks.filter(b => 
+      !b.id.includes('introduction') && 
+      !b.id.includes('intro') && 
+      !b.id.includes('title') &&
+      !b.id.includes('media')
+    );
+
+    console.log('PDF Generator - clauseBlocks count:', clauseBlocks.length);
+    clauseBlocks.forEach((block) => {
+      const clauseText = interpolateTemplate(block.templateText, interpolationParams);
+      addBullet(clauseText);
+    });
   } else {
-    addText(introText, 9);
+    console.log('PDF Generator - Using hardcoded templates (fallback)');
+    // Fall back to hardcoded templates (for backwards compatibility)
+    const { 
+      PASSENGER_WAIVER, 
+      REPRESENTATIVE_WAIVER 
+    } = await import('../config/waiver-templates');
+    
+    let introText = '';
+    let introPrefix = '';
+    let sectionTitle = '';
+    let clauses: string[] = [];
+    
+    if (isRepresentative && submission.representative) {
+      introPrefix = `I, ${submission.representative.firstName} ${submission.representative.lastName}, the undersigned, attest that I am the Legal Guardian/Power of Attorney of ${submission.passenger.firstName} ${submission.passenger.lastName} of the town of ${submission.passenger.town},`;
+      introText = REPRESENTATIVE_WAIVER.introduction.template(
+        submission.representative.firstName,
+        submission.representative.lastName,
+        submission.passenger.firstName,
+        submission.passenger.lastName,
+        submission.passenger.town
+      );
+      sectionTitle = REPRESENTATIVE_WAIVER.informedConsentSection.title;
+      clauses = REPRESENTATIVE_WAIVER.informedConsentSection.clauses;
+    } else {
+      introPrefix = `I, ${submission.passenger.firstName} ${submission.passenger.lastName} of the town of ${submission.passenger.town},`;
+      introText = PASSENGER_WAIVER.introduction.template(
+        submission.passenger.firstName,
+        submission.passenger.lastName,
+        submission.passenger.town
+      );
+      sectionTitle = PASSENGER_WAIVER.waiverSection.title;
+      clauses = PASSENGER_WAIVER.waiverSection.clauses;
+    }
+    
+    const introBody = introText.startsWith(introPrefix)
+      ? introText.slice(introPrefix.length).trimStart()
+      : introText;
+
+    if (introText.startsWith(introPrefix)) {
+      addText(introPrefix, 9, true);
+      if (introBody) {
+        addText(introBody, 9);
+      }
+    } else {
+      addText(introText, 9);
+    }
+    yPos += 3;
+
+    // --- WAIVER/INFORMED CONSENT CLAUSES SECTION ---
+    addText(sectionTitle, 10.5, true);
+    yPos += 2;
+
+    clauses.forEach((clause: string) => {
+      addBullet(clause);
+    });
   }
-  yPos += 3;
-
-  // --- WAIVER/INFORMED CONSENT CLAUSES SECTION ---
-  addText(sectionTitle, 10.5, true);
-  yPos += 2;
-
-  clauses.forEach((clause: string) => {
-    addBullet(clause);
-  });
 
   yPos += 3;
 
   // --- MEDIA RELEASE SECTION ---
-  addText(waiverContent.mediaReleaseSection.title, 10.5, true);
+  addText('Media Release', 10.5, true);
   yPos += 2;
 
-  addText(waiverContent.mediaReleaseSection.description, 9);
-  yPos += 2;
-
-  // Determine media release selection
-  let mediaConsentText = '';
-  const mediaOptions = waiverContent.mediaReleaseSection.options;
-  
-  if (isRepresentative && submission.passenger.firstName) {
-    if (submission.mediaRelease.includes('do not consent')) {
-      mediaConsentText = typeof mediaOptions.noConsent === 'function' 
-        ? mediaOptions.noConsent(submission.passenger.firstName)
-        : mediaOptions.noConsent;
-    } else if (submission.mediaRelease.includes('initials instead')) {
-      mediaConsentText = typeof mediaOptions.consentWithInitials === 'function'
-        ? mediaOptions.consentWithInitials(submission.passenger.firstName)
-        : mediaOptions.consentWithInitials;
-    } else {
-      mediaConsentText = typeof mediaOptions.fullConsent === 'function'
-        ? mediaOptions.fullConsent(submission.passenger.firstName)
-        : mediaOptions.fullConsent;
-    }
-  } else {
-    if (submission.mediaRelease.includes('do not consent')) {
-      mediaConsentText = mediaOptions.noConsent as string;
-    } else if (submission.mediaRelease.includes('initials instead')) {
-      mediaConsentText = mediaOptions.consentWithInitials as string;
-    } else {
-      mediaConsentText = mediaOptions.fullConsent as string;
-    }
-  }
-  
-  addText(mediaConsentText, 9);
-  yPos += 3;
-
-  // --- ACKNOWLEDGMENT (for passenger waiver only) ---
-  if (!isRepresentative && 'acknowledgment' in waiverContent) {
-    addText(waiverContent.acknowledgment, 9);
-    yPos += 4;
-  } else {
-    yPos += 2;
-  }
+  // Media release text
+  addText(submission.mediaRelease, 9);
+  yPos += 4;
 
   // --- SIGNATURE BLOCKS SECTION ---
   checkNewPage(48); // Ensure signature row stays on same page

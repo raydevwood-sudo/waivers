@@ -65,6 +65,22 @@ export interface SignatureModalProps {
   signeeType: 'passenger' | 'witness';
 }
 
+// Template Types
+export interface WaiverTemplateBlock {
+  id: string;
+  label: string;
+  templateText: string;
+  parameters: string[];
+}
+
+export interface WaiverTemplate {
+  title: string;
+  waiverType: WaiverType;
+  version: string;
+  effectiveDate: string;
+  blocks: WaiverTemplateBlock[];
+}
+
 // API Types
 export interface WaiverSubmission {
   waiverUId?: string;
@@ -74,6 +90,7 @@ export interface WaiverSubmission {
   pdfStoragePath?: string;
   pdfFilePath?: string;
   waiverType: WaiverType;
+  template?: WaiverTemplate; // Dynamic template data for PDF generation
   passenger: {
     firstName: string;
     lastName: string;

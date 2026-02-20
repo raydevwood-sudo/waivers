@@ -50,13 +50,19 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
             type="button"
             onClick={() => onOpenSignature('passenger')}
             className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 h-40 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
+            aria-label={
+              formData.passengerSignature 
+                ? 'View or change signature' 
+                : `Click to add ${isRepresentative ? 'legal representative' : 'passenger'} signature`
+            }
           >
-            <img
-              src={formData.passengerSignature}
-              alt={isRepresentative ? 'Legal Representative Signature' : 'Passenger Signature'}
-              className="w-full h-full object-contain"
-            />
-            {!formData.passengerTimestamp && (
+            {formData.passengerSignature ? (
+              <img
+                src={formData.passengerSignature}
+                alt={`${isRepresentative ? 'Legal Representative' : 'Passenger'} signature`}
+                className="w-full h-full object-contain"
+              />
+            ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-500 group-hover:text-primary">
                   ✍️ Click to sign
@@ -91,13 +97,15 @@ export default function SignaturePage({ formData, waiverType, onInputChange, onO
             type="button"
             onClick={() => onOpenSignature('witness')}
             className="relative w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-4 h-40 hover:border-primary hover:bg-primary/5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20 group"
+            aria-label={formData.witnessSignature ? 'View or change witness signature' : 'Click to add witness signature'}
           >
-            <img
-              src={formData.witnessSignature}
-              alt="Witness Signature"
-              className="w-full h-full object-contain"
-            />
-            {!formData.witnessTimestamp && (
+            {formData.witnessSignature ? (
+              <img
+                src={formData.witnessSignature}
+                alt="Witness signature"
+                className="w-full h-full object-contain"
+              />
+            ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-500 group-hover:text-primary">
                   ✍️ Click to sign

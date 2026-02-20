@@ -32,11 +32,28 @@ This document outlines the complete migration plan for the Waiver and Release of
 
 ---
 
-## 🎉 Current Status - MIGRATION COMPLETE + ENHANCEMENTS
+## 🎉 Current Status - MIGRATION COMPLETE + ALL APPS DEPLOYED
 
-**Status:** ✅ **DEPLOYED TO PRODUCTION**  
-**Last Updated:** February 19, 2026  
-**Deployment Date:** February 16-19, 2026
+**Status:** ✅ **ALL 4 APPS IN PRODUCTION (Test Environment)**  
+**Last Updated:** February 20, 2026  
+**Deployment Date:** February 16-20, 2026
+
+**Current Phase:** Testing & Validation  
+**Next Phase:** Production Firebase Migration
+
+### What's Complete
+- ✅ All 4 applications built and deployed to test Firebase (cwas-testing)
+- ✅ Full feature set implemented and operational
+- ✅ Authentication and authorization working
+- ✅ Cloud Functions deployed and tested
+- ✅ Security rules configured
+
+### What's Next
+- 🔄 Developer testing and bug fixes
+- 🔄 User acceptance testing (UAT) with volunteers/staff/admins
+- ⏭️ Migration to organization's production Firebase project
+- ⏭️ Data migration from Google Sheets to Firestore
+- ⏭️ Production launch and user training
 
 ### Production Applications
 
@@ -87,27 +104,27 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth/Storage
 - **Final Step:** Add authorized domain `paper-waiver-upload.web.app` to Firebase Auth
 
-#### 4. **Waivers Admin** (Planned)
-- **URL:** `waivers-admin.web.app` (proposed)
+#### 4. **Waivers Admin / Console** (Authenticated)
+- **URL:** https://waiver-console.web.app
 - **Purpose:** Restricted app for managing platform settings and waiver versions
-- **Status:** 🟡 Planned
-- **MVP Scope:**
-  - Manage `waivers/settings` document
-  - Configure Valid Waivers access control (`open` / `restricted`, allowed emails, allowed domains)
-  - Manage waiver version metadata (passenger + representative version and effective date)
-  - Manage solution-level settings (organization display name, support email, feature flags)
-  - Change history fields (`updatedAt`, `updatedBy`)
-- **Out of Scope (MVP):**
-  - Full WYSIWYG clause editing
-  - Multi-step legal approval workflow
-  - Diff viewer and rollback UI
+- **Status:** ✅ Fully operational
+- **Features:**
+  - Google Sign-In authentication
+  - Admin-only access control via `VITE_WAIVERS_ADMIN_EMAILS`
+  - **Settings Manager:** Configure organization name, support email, feature flags, Valid Waivers access control
+  - **Template Manager:** Create/edit waiver templates, version control, draft/publish workflow
+  - Real-time settings updates to Firestore
+  - Audit trail (updatedAt, updatedBy tracking)
+  - Access denied page for unauthorized users
+- **Tech Stack:** React 19.2, Vite 7.3, TypeScript 5.9, Tailwind CSS 3.4, Firebase Auth/Firestore
+- **Security:** Email-based admin authorization required
 
 ### Firebase Infrastructure
 
 #### Project Details
 - **Project ID:** `cwas-testing`
 - **Region:** northamerica-northeast2
-- **Multi-site Hosting:** 3 sites (passenger-waivers, valid-waivers, paper-waiver-upload)
+- **Multi-site Hosting:** 4 sites (passenger-waivers, valid-waivers, waiver-upload, waiver-console)
 
 #### Cloud Functions (2nd Gen)
 - **submitWaiverSecure** (us-central1, Node.js 24)
@@ -142,7 +159,8 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Authorized Domains:**
   - passenger-waivers.web.app
   - valid-waivers.web.app
-  - paper-waiver-upload.web.app (pending addition)
+  - waiver-upload.web.app
+  - waiver-console.web.app
 
 ### Completed Migration Phases
 
@@ -213,6 +231,11 @@ This document outlines the complete migration plan for the Waiver and Release of
 - **Delivered:** Authenticated form for manual entry and PDF upload of paper waivers
 - **Value:** Bridges gap between legacy paper waivers and digital system, enables complete waiver database
 
+#### Waivers Admin Console
+- **Scope:** Initially planned as MVP only
+- **Delivered:** Full-featured admin console with Settings Manager and Template Manager
+- **Value:** Complete control over system configuration, access control, and waiver template versioning
+
 #### Branding & UX Polish
 - Custom logo integration (Cycling Without Age Society)
 - Alternating row colors for table readability
@@ -224,31 +247,716 @@ This document outlines the complete migration plan for the Waiver and Release of
 
 - **Modern Stack:** React 19 + Vite 7 + TypeScript 5.9 + Tailwind CSS 3.4
 - **Serverless Architecture:** Firebase Cloud Functions (2nd Gen, Node.js 24)
-- **Multi-site Hosting:** 3 independent applications on single Firebase project
+- **Multi-site Hosting:** 4 independent applications on single Firebase project
 - **Authentication:** Google Sign-In with authorized domain management
-- **Security:** Granular Firestore/Storage rules, App Check optional
+- **Security:** Granular Firestore/Storage rules, App Check optional, admin email authorization
 - **Performance:** Client-side PDF generation, optimized bundle sizes
 - **Code Quality:** ESLint with Google config, TypeScript strict mode, consistent formatting
+- **Template Management:** Version-controlled waiver templates with draft/publish workflow
 
 ### Outstanding Tasks
 
 1. ✅ **Passenger Waiver App** - Complete and operational
 2. ✅ **Valid Waivers App** - Complete and operational
-3. ⏳ **Paper Waiver Upload** - Deployed, needs auth domain added (1 min manual step)
-4. ❌ **Email Integration** - Deferred (not required for MVP)
-5. ❌ **Waivers Admin** - Planned and not started
+3. ✅ **Paper Waiver Upload** - Complete and operational
+4. ✅ **Waivers Admin Console** - Complete and operational
+5. ❌ **Email Integration** - Deferred (not required for MVP)
 6. ❌ **Domain Custom URL** - Using Firebase subdomains (cyclingwithoutagesociety.org integration deferred)
 
 ### Next Steps
 
-1. **Add paper-waiver-upload.web.app to Firebase Auth authorized domains** (1 min)
-2. **Train volunteers on Valid Waivers app** (viewing/searching)
-3. **Train staff on Paper Waiver Upload tool** (manual data entry)
-4. **Build Waivers Admin MVP** (settings + access control + version metadata)
-5. **Monitor Cloud Function usage and costs**
-6. **Future: Enable App Check with ReCaptcha for spam protection** (optional)
-7. **Future: Add email delivery via SendGrid** (optional enhancement)
-8. **Future: Custom domain setup** (cyclingwithoutagesociety.org redirect)
+1. **Complete testing and validation** (developer + user testing)
+2. **Migrate to organization Firebase project** (from cwas-testing)
+3. **Perform data migration from Google Sheets to Firestore** (once confident)
+4. **Train users on all 4 applications**
+5. **Monitor production usage and costs**
+
+---
+
+## Testing & Production Readiness Plan
+
+### Phase 1: Developer Testing (Current)
+
+**Objective:** Verify all features work correctly in the test Firebase project (cwas-testing)
+
+#### Testing Checklist
+
+**Passenger Waiver App (passenger-waivers.web.app)**
+- ✅ Load form and navigate through all 14 steps
+- ✅ Test waiver type switching (passenger vs representative)
+- ✅ Validate all form fields (required fields, patterns)
+- ✅ Capture both passenger and witness signatures
+- ✅ Submit complete waiver
+- ✅ Verify PDF generation includes all data and signatures
+- ✅ Confirm data saved to Firestore correctly
+- ✅ Verify PDF stored in Firebase Storage
+- ✅ Check expiry date is 1 year from submission
+- ✅ Test on mobile devices (responsive design)
+- ✅ Test error handling (network failures, validation errors)
+
+**Valid Waivers App (valid-waivers.web.app)**
+- ✅ Google Sign-In works
+- ✅ Waiver list displays correctly with all columns
+- ✅ Sorting works (Last Name, First Name, Expiry Date)
+- ✅ Search by name works (first and last)
+- ✅ Filter by validity status (valid/expired/all)
+- ✅ Media release indicator displays correctly
+- ✅ Click to view PDF modal opens
+- ✅ PDF renders correctly in modal
+- ✅ Access control enforcement (if restricted mode enabled)
+- ✅ Test with multiple users and access levels
+
+**Paper Waiver Upload (waiver-upload.web.app)**
+- ✅ Google Sign-In works
+- ✅ All form fields accept input correctly
+- ✅ PDF file upload works (accept .pdf only)
+- ✅ Waiver type selection works
+- ✅ Form validation prevents invalid submissions
+- ✅ Successful upload creates Firestore document
+- ✅ Uploaded PDF stored in Firebase Storage
+- ✅ uploadedBy and uploadedAt metadata saved correctly
+- ✅ Source field set to "paper-upload"
+- ✅ Form resets after successful submission
+- ✅ Error handling for upload failures
+
+**Waiver Console (waiver-console.web.app)**
+- ✅ Google Sign-In works
+- ✅ Admin authorization enforced (VITE_WAIVERS_ADMIN_EMAILS)
+- ✅ Unauthorized users see "Access Denied" message
+- ✅ Settings tab loads current settings
+- ✅ Settings can be updated and saved
+- ✅ Access control settings work (open vs restricted mode)
+- ✅ Email/domain allowlists update correctly
+- ✅ Template Manager tab loads templates
+- ✅ Templates can be created and edited
+- ✅ Version tracking works correctly
+- ✅ Draft/publish workflow functions
+- ✅ Settings changes reflect in Valid Waivers app immediately
+
+**Cloud Functions**
+- ✅ submitWaiverSecure function executes successfully
+- ✅ Function logs show no errors
+- ✅ Check function execution time and costs
+- ✅ Verify proper error handling
+
+### Phase 2: User Acceptance Testing (UAT)
+
+**Objective:** Get real users to test all applications and provide feedback
+
+#### UAT Participants
+- **Volunteers:** Test Valid Waivers app for searching/viewing
+- **Staff:** Test Paper Waiver Upload for data entry
+- **Administrators:** Test Waiver Console for settings management
+- **Public Users:** Test Passenger Waiver submission form
+
+#### UAT Test Scenarios
+
+**Scenario 1: New Passenger Submits Waiver**
+1. Navigate to passenger-waivers.web.app
+2. Complete entire waiver form
+3. Provide digital signatures (passenger + witness)
+4. Submit and verify success message
+5. Staff verifies waiver appears in Valid Waivers app
+
+**Scenario 2: Volunteer Searches for Valid Waiver**
+1. Sign in to valid-waivers.web.app
+2. Search for passenger by name
+3. Verify expiry date shows waiver is valid
+4. Open PDF to review waiver details
+5. Confirm all information is accurate
+
+**Scenario 3: Staff Uploads Paper Waiver**
+1. Sign in to waiver-upload.web.app
+2. Enter passenger information from paper form
+3. Upload scanned PDF
+4. Submit and verify success
+5. Check that waiver appears in Valid Waivers app
+
+**Scenario 4: Admin Updates Settings**
+1. Sign in to waiver-console.web.app
+2. Navigate to Settings tab
+3. Update organization name or support email
+4. Save changes
+5. Verify changes persist on reload
+
+**Scenario 5: Admin Manages Access Control**
+1. Admin sets Valid Waivers to "restricted" mode
+2. Adds authorized email addresses
+3. Unauthorized user attempts to access Valid Waivers
+4. Verify access is denied
+5. Authorized user can access successfully
+
+#### UAT Feedback Collection
+- Create Google Form for feedback
+- Track issues in GitHub Issues
+- Document feature requests separately
+- Prioritize critical bugs vs enhancements
+
+### Phase 3: Firebase Project Migration
+
+**Objective:** Move from test project (cwas-testing) to organization's production Firebase project
+
+#### Prerequisites
+- [ ] UAT completed with no critical bugs
+- [ ] Organization Firebase project created
+- [ ] Billing enabled on organization Firebase project (Blaze plan required)
+- [ ] Access permissions granted to developers
+
+#### Migration Steps
+
+**Step 1: Create New Firebase Project**
+```bash
+# In Firebase Console:
+# 1. Create new project (e.g., "cycling-without-age-prod")
+# 2. Enable Firestore, Storage, Functions, Hosting, Authentication
+# 3. Set up billing (Blaze plan)
+# 4. Configure security rules
+```
+
+**Step 2: Export Firebase Configuration**
+```bash
+# From new project, get config values:
+# - apiKey
+# - authDomain
+# - projectId
+# - storageBucket
+# - messagingSenderId
+# - appId
+```
+
+**Step 3: Update Environment Variables**
+```bash
+# Update each app's .env.local file:
+
+# waivers-app/.env.local
+VITE_FIREBASE_API_KEY=<new-api-key>
+VITE_FIREBASE_AUTH_DOMAIN=<new-auth-domain>
+VITE_FIREBASE_PROJECT_ID=<new-project-id>
+VITE_FIREBASE_STORAGE_BUCKET=<new-storage-bucket>
+VITE_FIREBASE_MESSAGING_SENDER_ID=<new-sender-id>
+VITE_FIREBASE_APP_ID=<new-app-id>
+
+# Repeat for valid-waivers/.env.local
+# Repeat for paper-waiver-upload/.env.local
+# Repeat for waivers-admin/.env.local
+
+# Update waivers-admin/.env.local admin emails:
+VITE_WAIVERS_ADMIN_EMAILS=admin1@org.com,admin2@org.com
+
+# Update functions/.env (if using environment variables):
+SENDGRID_API_KEY=<if-using-email>
+```
+
+**Step 4: Create Firebase Hosting Sites**
+```bash
+# In Firebase Console > Hosting:
+# 1. Add sites: passenger-waivers, valid-waivers, waiver-upload, waiver-console
+# 2. OR use custom domains for your organization
+```
+
+**Step 5: Update Firebase Configuration**
+```bash
+# Update .firebaserc
+firebase use --add
+# Select new project
+# Create alias: production
+
+# Verify firebase.json has correct hosting sites
+```
+
+**Step 6: Deploy Cloud Functions**
+```bash
+cd functions
+npm install
+npm run build
+firebase deploy --only functions --project production
+```
+
+**Step 7: Configure Firestore Security Rules**
+```bash
+# Deploy security rules
+firebase deploy --only firestore:rules --project production
+firebase deploy --only storage:rules --project production
+```
+
+**Step 8: Configure Firebase Authentication**
+```bash
+# In Firebase Console > Authentication:
+# 1. Enable Google Sign-In provider
+# 2. Add authorized domains:
+#    - Your hosting URLs (*.web.app or custom domains)
+#    - localhost (for development)
+```
+
+**Step 9: Build and Deploy All Apps**
+```bash
+# Build each app
+cd waivers-app && npm run build && cd ..
+cd valid-waivers && npm run build && cd ..
+cd paper-waiver-upload && npm run build && cd ..
+cd waivers-admin && npm run build && cd ..
+
+# Deploy all hosting sites
+firebase deploy --only hosting --project production
+```
+
+**Step 10: Verify Deployment**
+- [ ] Test all 4 apps in production environment
+- [ ] Verify authentication works
+- [ ] Submit test waiver and verify end-to-end flow
+- [ ] Check Cloud Functions logs for errors
+- [ ] Monitor costs and usage
+
+**Step 11: Update DNS (Optional)**
+```bash
+# If using custom domains:
+# 1. Add custom domains in Firebase Console
+# 2. Update DNS records (A, AAAA, TXT)
+# 3. Wait for SSL certificate provisioning
+# 4. Test custom URLs
+```
+
+#### Migration Rollback Plan
+- Keep cwas-testing project active during transition
+- Document any issues encountered
+- Be prepared to revert DNS if using custom domains
+- Have contact list for urgent issues
+
+### Phase 4: Data Migration (Google Sheets → Firestore)
+
+**Objective:** Migrate existing waiver data from Google Sheets to Firestore
+
+#### Prerequisites
+- [ ] Firebase project migration completed
+- [ ] Apps tested and working in production
+- [ ] Confidence in system stability
+- [ ] Backup of Google Sheets data created
+
+#### Data Migration Strategy
+
+**Step 1: Analyze Google Sheets Structure**
+```javascript
+// Document current sheets columns and data:
+// - Sheet ID: 1YtbfqG5ruxZikzMzogS6RFe0bxGJsWTUHh_c7rjGCz4
+// - Identify all columns and data types
+// - Map to Firestore schema
+```
+
+**Step 2: Create Migration Script**
+```javascript
+// functions/scripts/migrate-sheets-to-firestore.js
+
+const admin = require('firebase-admin');
+const { google } = require('googleapis');
+
+// Initialize Firebase Admin
+admin.initializeApp();
+const db = admin.firestore();
+
+// Google Sheets configuration
+const SPREADSHEET_ID = '1YtbfqG5ruxZikzMzogS6RFe0bxGJsWTUHh_c7rjGCz4';
+const SHEET_NAME = 'Waivers'; // Adjust to actual sheet name
+
+async function migrateWaivers() {
+  // 1. Authenticate with Google Sheets API
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  });
+  
+  const sheets = google.sheets({ version: 'v4', auth });
+  
+  // 2. Read all rows from Google Sheets
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${SHEET_NAME}!A:Z`, // Adjust range as needed
+  });
+  
+  const rows = response.data.values;
+  const headers = rows[0]; // First row is headers
+  const dataRows = rows.slice(1); // Rest are data
+  
+  console.log(`Found ${dataRows.length} rows to migrate`);
+  
+  // 3. Transform and upload to Firestore
+  const batch = db.batch();
+  let batchCount = 0;
+  let totalCount = 0;
+  
+  for (const row of dataRows) {
+    // Map row to Firestore document structure
+    const waiverData = {
+      // Personal Info
+      waiverType: getColumnValue(row, headers, 'WaiverType'),
+      firstName: getColumnValue(row, headers, 'FirstName'),
+      lastName: getColumnValue(row, headers, 'LastName'),
+      town: getColumnValue(row, headers, 'Town'),
+      email: getColumnValue(row, headers, 'Email'),
+      phone: getColumnValue(row, headers, 'Phone'),
+      
+      // Representative info (if applicable)
+      representativeFirstName: getColumnValue(row, headers, 'RepFirstName'),
+      representativeLastName: getColumnValue(row, headers, 'RepLastName'),
+      representativeTown: getColumnValue(row, headers, 'RepTown'),
+      representativeEmail: getColumnValue(row, headers, 'RepEmail'),
+      representativePhone: getColumnValue(row, headers, 'RepPhone'),
+      relationshipToPassenger: getColumnValue(row, headers, 'Relationship'),
+      
+      // Agreements
+      informedConsent1: true,
+      informedConsent2: true,
+      informedConsent3: true,
+      informedConsent4: true,
+      informedConsent5: true,
+      waiver1: true,
+      waiver2: true,
+      waiver3: true,
+      waiver4: true,
+      waiver5: true,
+      
+      // Media release
+      mediaRelease: getColumnValue(row, headers, 'MediaRelease') || 'no',
+      
+      // Signatures
+      passengerSignature: getColumnValue(row, headers, 'PassengerSignature'),
+      passengerTimestamp: parseTimestamp(getColumnValue(row, headers, 'PassengerTimestamp')),
+      witnessSignature: getColumnValue(row, headers, 'WitnessSignature'),
+      witnessTimestamp: parseTimestamp(getColumnValue(row, headers, 'WitnessTimestamp')),
+      
+      // Metadata
+      submittedAt: parseTimestamp(getColumnValue(row, headers, 'SubmittedAt')),
+      expiresAt: calculateExpiry(parseTimestamp(getColumnValue(row, headers, 'SubmittedAt'))),
+      pdfFilePath: getColumnValue(row, headers, 'PDFPath'),
+      
+      // Migration metadata
+      migratedFrom: 'google-sheets',
+      migratedAt: admin.firestore.FieldValue.serverTimestamp(),
+      source: 'migration',
+    };
+    
+    // Create document reference (use existing ID or generate new)
+    const waiverId = getColumnValue(row, headers, 'WaiverID') || db.collection('waivers').doc().id;
+    const docRef = db.collection('waivers').doc(waiverId);
+    
+    batch.set(docRef, waiverData);
+    batchCount++;
+    totalCount++;
+    
+    // Firestore batch limit is 500 operations
+    if (batchCount >= 500) {
+      await batch.commit();
+      console.log(`Committed batch of ${batchCount} documents (total: ${totalCount})`);
+      batchCount = 0;
+    }
+  }
+  
+  // Commit remaining documents
+  if (batchCount > 0) {
+    await batch.commit();
+    console.log(`Committed final batch of ${batchCount} documents`);
+  }
+  
+  console.log(`✅ Migration complete! Total documents: ${totalCount}`);
+}
+
+// Helper functions
+function getColumnValue(row, headers, columnName) {
+  const index = headers.indexOf(columnName);
+  return index >= 0 ? row[index] : null;
+}
+
+function parseTimestamp(dateString) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  return admin.firestore.Timestamp.fromDate(date);
+}
+
+function calculateExpiry(submittedAt) {
+  if (!submittedAt) return null;
+  const date = submittedAt.toDate();
+  date.setFullYear(date.getFullYear() + 1);
+  return admin.firestore.Timestamp.fromDate(date);
+}
+
+// Run migration
+migrateWaivers()
+  .then(() => {
+    console.log('Migration completed successfully');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('Migration failed:', error);
+    process.exit(1);
+  });
+```
+
+**Step 3: Migrate PDF Files from Google Drive**
+```javascript
+// functions/scripts/migrate-pdfs-from-drive.js
+
+const admin = require('firebase-admin');
+const { google } = require('googleapis');
+const fetch = require('node-fetch');
+
+async function migratePDFs() {
+  // 1. Authenticate with Google Drive API
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+  });
+  
+  const drive = google.drive({ version: 'v3', auth });
+  const bucket = admin.storage().bucket();
+  
+  // 2. List all files in Drive folder
+  const FOLDER_ID = '1UhPmYPOJXdfaUy9JSQZ3J_QvYJkoh4BM';
+  
+  const response = await drive.files.list({
+    q: `'${FOLDER_ID}' in parents and mimeType='application/pdf'`,
+    fields: 'files(id, name)',
+  });
+  
+  const files = response.data.files;
+  console.log(`Found ${files.length} PDF files to migrate`);
+  
+  // 3. Download and upload each PDF
+  for (const file of files) {
+    try {
+      // Download from Drive
+      const driveResponse = await drive.files.get(
+        { fileId: file.id, alt: 'media' },
+        { responseType: 'arraybuffer' }
+      );
+      
+      // Upload to Firebase Storage
+      const storageFile = bucket.file(`waivers/pdfs/${file.name}`);
+      await storageFile.save(Buffer.from(driveResponse.data), {
+        metadata: {
+          contentType: 'application/pdf',
+          metadata: {
+            migratedFrom: 'google-drive',
+            originalFileId: file.id,
+          },
+        },
+      });
+      
+      console.log(`✅ Migrated: ${file.name}`);
+    } catch (error) {
+      console.error(`❌ Failed to migrate ${file.name}:`, error.message);
+    }
+  }
+  
+  console.log('PDF migration complete!');
+}
+
+// Run migration
+migratePDFs()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('PDF migration failed:', error);
+    process.exit(1);
+  });
+```
+
+**Step 4: Execute Migration**
+```bash
+# Install required packages
+cd functions
+npm install googleapis node-fetch
+
+# Set up Google Sheets/Drive API credentials
+# Download service account JSON from Google Cloud Console
+export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account-key.json"
+
+# Run data migration
+node scripts/migrate-sheets-to-firestore.js
+
+# Run PDF migration
+node scripts/migrate-pdfs-from-drive.js
+```
+
+**Step 5: Validate Migration**
+```javascript
+// functions/scripts/validate-migration.js
+
+const admin = require('firebase-admin');
+const { google } = require('googleapis');
+
+async function validateMigration() {
+  admin.initializeApp();
+  const db = admin.firestore();
+  
+  // Get counts from both sources
+  const sheetsCount = await getGoogleSheetsRowCount();
+  const firestoreSnapshot = await db.collection('waivers').get();
+  const firestoreCount = firestoreSnapshot.size;
+  
+  console.log(`Google Sheets rows: ${sheetsCount}`);
+  console.log(`Firestore documents: ${firestoreCount}`);
+  
+  if (sheetsCount === firestoreCount) {
+    console.log('✅ Record counts match!');
+  } else {
+    console.log('⚠️  Record counts do not match!');
+  }
+  
+  // Spot check random documents
+  const randomDocs = firestoreSnapshot.docs
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 10);
+  
+  console.log('\nSpot checking 10 random documents...');
+  for (const doc of randomDocs) {
+    const data = doc.data();
+    console.log(`- ${data.firstName} ${data.lastName}: ${data.email}`);
+  }
+}
+
+async function getGoogleSheetsRowCount() {
+  // Implementation to count rows in Google Sheets
+  // ... (similar to migration script)
+}
+
+validateMigration()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('Validation failed:', error);
+    process.exit(1);
+  });
+```
+
+**Step 6: Post-Migration Verification**
+- [ ] Verify total record count matches
+- [ ] Spot check 20+ records for data accuracy
+- [ ] Verify all PDFs are accessible
+- [ ] Test Valid Waivers app with migrated data
+- [ ] Verify search and filter functionality works
+- [ ] Check expiry dates are calculated correctly
+- [ ] Confirm no data loss or corruption
+
+**Step 7: Cutover Plan**
+1. **Communicate cutover window** (e.g., "Saturday 2-4 PM")
+2. **Pause Google Sheets writes** (make sheet read-only)
+3. **Run final incremental migration** (catch any last-minute entries)
+4. **Point users to new system** (update links, send announcements)
+5. **Keep Google Sheets as read-only backup** (don't delete for 90 days)
+6. **Monitor new system closely** (first 48 hours critical)
+
+#### Data Migration Rollback Plan
+- Keep Google Sheets and Drive as backup for 90 days
+- Document process to export from Firestore back to Sheets if needed
+- Have plan to restore previous Firebase configuration
+- Communicate rollback procedure to stakeholders
+
+### Phase 5: Testing Documentation
+
+#### Test Case Templates
+
+**Test Case Template:**
+```markdown
+## Test Case: [Feature Name]
+
+**ID:** TC-[Number]
+**Priority:** High/Medium/Low
+**Component:** [App Name]
+
+**Preconditions:**
+- List any setup required
+
+**Test Steps:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+**Expected Results:**
+- Expected outcome 1
+- Expected outcome 2
+
+**Actual Results:**
+- [To be filled during testing]
+
+**Status:** Pass/Fail/Blocked
+
+**Notes:**
+- Any additional observations
+```
+
+#### UAT Feedback Form
+
+Create a Google Form with these questions:
+
+1. Which app did you test? (dropdown)
+2. What task were you trying to complete? (text)
+3. Were you able to complete the task? (yes/no)
+4. If no, what prevented you? (text)
+5. Rate the ease of use (1-5 scale)
+6. Rate the interface design (1-5 scale)
+7. Did you encounter any errors? (yes/no)
+8. If yes, please describe the error (text)
+9. What did you like most? (text)
+10. What needs improvement? (text)
+11. Any additional feedback? (text)
+
+#### Bug Report Template
+
+```markdown
+## Bug Report
+
+**Summary:** [Brief description]
+
+**Severity:** Critical/High/Medium/Low
+
+**Environment:**
+- App: [Which of the 4 apps]
+- Browser: [Chrome/Firefox/Safari/etc.]
+- OS: [Windows/Mac/iOS/Android]
+- URL: [Specific URL where bug occurred]
+
+**Steps to Reproduce:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+**Expected Behavior:**
+[What should happen]
+
+**Actual Behavior:**
+[What actually happens]
+
+**Screenshots:**
+[Attach screenshots if available]
+
+**Console Errors:**
+[Any errors from browser console]
+
+**Additional Context:**
+[Any other relevant information]
+```
+
+### Success Criteria
+
+**Testing Phase Complete When:**
+- [ ] All test cases pass
+- [ ] Zero critical bugs
+- [ ] All high-priority bugs resolved
+- [ ] UAT participants approve
+- [ ] Performance meets requirements (< 3 second page loads)
+- [ ] Mobile testing complete
+
+**Firebase Migration Complete When:**
+- [ ] All 4 apps deployed to organization Firebase
+- [ ] All functionality working in production
+- [ ] Authentication configured and tested
+- [ ] Security rules validated
+- [ ] Monitoring and alerts set up
+
+**Data Migration Complete When:**
+- [ ] All historical data migrated to Firestore
+- [ ] All PDFs migrated to Firebase Storage
+- [ ] Data validation confirms accuracy
+- [ ] Valid Waivers app shows all records
+- [ ] No critical issues for 48 hours post-migration
+- [ ] Google Sheets decommissioned (after 90-day backup period)
+
+---
 
 ### Repository Information
 
@@ -265,12 +973,13 @@ This document outlines the complete migration plan for the Waiver and Release of
 2. [Architecture Overview](#2-architecture-overview)
 3. [Technology Stack](#3-technology-stack)
 4. [Migration Phases](#4-migration-phases)
-5. [Database Schema](#5-database-schema)
-6. [Component Structure](#6-component-structure)
-7. [Firebase Functions](#7-firebase-functions)
-8. [PDF Generation Strategy](#8-pdf-generation-strategy)
-9. [Email Service Integration](#9-email-service-integration)
-10. [Deployment Strategy](#10-deployment-strategy)
+5. [Testing & Production Readiness Plan](#testing--production-readiness-plan)
+6. [Database Schema](#5-database-schema)
+7. [Component Structure](#6-component-structure)
+8. [Firebase Functions](#7-firebase-functions)
+9. [PDF Generation Strategy](#8-pdf-generation-strategy)
+10. [Email Service Integration](#9-email-service-integration)
+11. [Deployment Strategy](#10-deployment-strategy)
 11. [Environment Configuration](#11-environment-configuration)
 12. [Testing Strategy](#12-testing-strategy)
 13. [Timeline Estimate](#13-timeline-estimate)
@@ -1912,6 +2621,11 @@ Each with separate:
 
 ### 11.1 Frontend Environment Variables
 
+When migrating this codebase to a new repository and/or Firebase project:
+- Update `VITE_RECAPTCHA_SITE_KEY` to a real reCAPTCHA v3 site key configured for that environment's domains (`localhost`, staging, production).
+- Do not invent or reuse unrelated keys across projects; create or register the correct key in Google reCAPTCHA.
+- Keep support contact details in the Firestore `waivers/settings` document (`solutionSettings.supportEmail`) rather than hard-coding per environment.
+
 **`.env.development`**
 ```
 VITE_FIREBASE_API_KEY=xxx
@@ -1920,6 +2634,7 @@ VITE_FIREBASE_PROJECT_ID=waivers-dev
 VITE_FIREBASE_STORAGE_BUCKET=waivers-dev.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
 VITE_FIREBASE_APP_ID=xxx
+VITE_RECAPTCHA_SITE_KEY=your_dev_recaptcha_v3_site_key
 ```
 
 **`.env.production`**
@@ -1930,6 +2645,7 @@ VITE_FIREBASE_PROJECT_ID=waivers-prod
 VITE_FIREBASE_STORAGE_BUCKET=waivers-prod.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
 VITE_FIREBASE_APP_ID=xxx
+VITE_RECAPTCHA_SITE_KEY=your_prod_recaptcha_v3_site_key
 ```
 
 ### 11.2 Firebase Functions Configuration
@@ -2184,9 +2900,14 @@ A dedicated restricted application for operational administration of the waiver 
 
 **Technical Architecture:**
 - **Separate React App** in repository (proposed folder: `waivers-admin/`)
+- **Separate Firebase Hosting site** for runtime isolation (`waivers-admin.web.app`), not embedded into `valid-waivers.web.app`
 - **Firebase Auth (Google)** with restricted allowlist/domain policy
 - **Firestore** as source of truth (`waivers/settings`)
 - **Form-based UI** with explicit Save/Cancel actions
+
+**Deployment Guardrail (Required):**
+- `valid-waivers.web.app` remains the volunteer-facing viewer app only
+- `waivers-admin.web.app` is restricted to admin users and hosts all settings/template management
 
 **Proposed Firestore Model (MVP):**
 
@@ -2298,13 +3019,16 @@ npm run deploy       # Deploy functions
 
 ---
 
-**Document Version:** 2.0  
-**Last Updated:** February 19, 2026  
-**Status:** ✅ MIGRATION COMPLETE - 3 Apps Deployed to Production
+**Document Version:** 4.0  
+**Last Updated:** February 20, 2026  
+**Status:** ✅ Development Complete - Testing & Migration Phase
 
 **Migration Summary:**
-- ✅ Passenger waiver submission app (passenger-waivers.web.app) - LIVE
-- ✅ Valid Waivers app (valid-waivers.web.app) - LIVE  
-- ✅ Paper waiver upload tool (paper-waiver-upload.web.app) - DEPLOYED
-- 🚀 All core functionality operational
-- 📊 Enhanced with volunteer verification features beyond original scope
+- ✅ All 4 apps deployed to test environment (cwas-testing)
+- ✅ Passenger waiver submission app (passenger-waivers.web.app)
+- ✅ Valid Waivers app (valid-waivers.web.app)
+- ✅ Paper waiver upload tool (waiver-upload.web.app)
+- ✅ Waiver Console admin app (waiver-console.web.app)
+- 🔄 Testing phase: Developer testing + User acceptance testing
+- ⏭️ Production migration: Firebase project migration + data migration from Google Sheets
+- 📊 Complete end-to-end waiver management system ready for production

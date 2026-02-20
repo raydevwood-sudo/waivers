@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FormProgress from './FormProgress';
 import FormNavigation from './FormNavigation';
 import SignatureModal from '../signature/SignatureModal';
+import { useTemplates } from '../../context/TemplateContext';
 import type { FormData, WaiverType } from '../../types';
 import type { FormField, FormPageProps, LocalFormData, SignatureSignee } from './pages/types';
 
@@ -35,6 +36,7 @@ const getTotalSteps = (): number => {
 const blankImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEU gAAASwAAACWCAYAAABkW7XSAAAAAXNSR0IArs4c6QAABGJJREFUeF7t1AEJAAAMAsHZv/RyPNwSyDncOQIECEQEFskpJgECBM5geQICBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAgQdWMQCX4yW9owAAAABJRU5ErkJggg==";
 
 export default function WaiverForm({ onSubmit }: WaiverFormProps) {
+  const { passengerTemplate, representativeTemplate, loading, error } = useTemplates();
   const [currentStep, setCurrentStep] = useState(0);
   const [waiverType, setWaiverType] = useState<WaiverType>('passenger');
   const [formData, setFormData] = useState<LocalFormData>({
@@ -342,6 +344,51 @@ export default function WaiverForm({ onSubmit }: WaiverFormProps) {
         return null;
     }
   };
+
+  // Show loading state while templates are being fetched
+  if (loading) {
+    return (
+      <div className="w-full max-w-3xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-gray-600">Loading waiver templates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if templates failed to load
+  if (error) {
+    return (
+      <div className="w-full max-w-3xl mx-auto px-4 py-6">
+        <div className="bg-red-50 rounded-2xl border-2 border-red-200 p-8 text-center">
+          <p className="text-red-800 font-semibold mb-2">Failed to load waiver templates</p>
+          <p className="text-red-600 text-sm">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hoverbg-red-700 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Warn if no active template is found for the selected type
+  const activeTemplate = waiverType === 'passenger' ? passengerTemplate : representativeTemplate;
+  if (!activeTemplate) {
+    return (
+      <div className="w-full max-w-3xl mx-auto px-4 py-6">
+        <div className="bg-yellow-50 rounded-2xl border-2 border-yellow-200 p-8 text-center">
+          <p className="text-yellow-800 font-semibold mb-2">No active template</p>
+          <p className="text-yellow-700 text-sm">
+            No active {waiverType} waiver template has been configured. Please contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-6">

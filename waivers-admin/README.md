@@ -1,16 +1,34 @@
-# Valid Waivers App
+# Waiver Console (Admin App)
 
-A modern, accessible volunteer-facing waiver verification application built with React, TypeScript, and Firebase.
+Administrative console for managing the waiver system configuration and templates. This app is **for administrators only** and provides tools for:
 
 ## Features
 
-- ✅ Multi-step form with progress tracking
-- ✅ Digital signature capture
-- ✅ WCAG 2.1 Level AA compliant
-- ✅ Full screen reader support
-- ✅ Mobile responsive design
-- ✅ Firebase Firestore integration
-- ✅ TypeScript for type safety
+### System Settings Tab
+- ✅ Organization name and support email configuration
+- ✅ Feature flags (enable/disable Passenger Waiver App, Paper Waiver Upload)
+- ✅ Valid Waivers app access control (open vs restricted mode)
+- ✅ Allowed email addresses and domains for Valid Waivers access
+- ✅ Waiver version metadata tracking (passenger & representative)
+
+### Waiver Templates Tab
+- ✅ Create and manage waiver template versions
+- ✅ Edit waiver content and clauses
+- ✅ Version history tracking
+- ✅ Draft, publish, and archive templates
+- ✅ Effective date management
+
+## Not Included In This App
+
+❌ Viewing submitted waivers (use Valid Waivers app)  
+❌ Submitting new waivers (use Passenger Waiver App)  
+❌ Uploading paper waivers (use Paper Waiver Upload app)
+
+## Access Control
+
+**Production URL:** https://waiver-console.web.app
+
+**Authorization:** Only Google accounts listed in `VITE_WAIVERS_ADMIN_EMAILS` environment variable can access this console. Unauthorized users will see an "Access Denied" message.
 
 ## Getting Started
 

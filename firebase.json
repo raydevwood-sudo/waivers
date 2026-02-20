@@ -41,6 +41,21 @@
     },
     {
       "site": "valid-waivers",
+      "public": "valid-waivers/dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "site": "waiver-console",
       "public": "waivers-admin/dist",
       "ignore": [
         "firebase.json",

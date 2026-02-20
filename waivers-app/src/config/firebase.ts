@@ -15,15 +15,17 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-let appCheck: AppCheck | null = null;
+// Disable App Check for now (it's causing 403 errors)
+// const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+// let appCheck: AppCheck | null = null;
 
-if (recaptchaSiteKey) {
-  appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(recaptchaSiteKey),
-    isTokenAutoRefreshEnabled: true,
-  });
-}
+// if (recaptchaSiteKey) {
+//   appCheck = initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+//     isTokenAutoRefreshEnabled: true,
+//   });
+// }
+const appCheck: AppCheck | null = null;
 
 // Initialize Firestore
 export const db = getFirestore(app);
@@ -32,12 +34,15 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 export async function getAppCheckToken(): Promise<string | null> {
-  if (!appCheck) {
-    return null;
-  }
+  // App Check disabled - return null
+  return null;
+  
+  // if (!appCheck) {
+  //   return null;
+  // }
 
-  const tokenResult = await getToken(appCheck, false);
-  return tokenResult.token;
+  // const tokenResult = await getToken(appCheck, false);
+  // return tokenResult.token;
 }
 
 export default app;

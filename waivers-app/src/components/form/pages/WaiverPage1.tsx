@@ -1,15 +1,28 @@
 import Checkbox from '../../ui/Checkbox';
-import { PASSENGER_WAIVER } from '../../../config/waiver-templates';
+import { useTemplateByType } from '../../../context/TemplateContext';
+import { interpolateTemplate } from '../../../services/template.service';
 import type { FormPageProps } from './types';
 
 type WaiverAgreementPageProps = Pick<FormPageProps, 'formData' | 'onInputChange'>;
 
 export default function WaiverPage1({ formData, onInputChange }: WaiverAgreementPageProps) {
-  const introText = PASSENGER_WAIVER.introduction.template(
-    formData.firstName || '[First Name]',
-    formData.lastName || '[Last Name]',
-    formData.town || '[Town]'
-  );
+  const { template } = useTemplateByType('passenger');
+
+  if (!template || template.blocks.length < 2) {
+    return (
+      <div className="space-y-6">
+        <p className="text-red-600">Template not configured properly</p>
+      </div>
+    );
+  }
+
+  // First block should be introduction
+  const introBlock = template.blocks[0];
+  const introText = interpolateTemplate(introBlock.templateText, {
+    firstName: formData.firstName || '[First Name]',
+    lastName: formData.lastName || '[Last Name]',
+    town: formData.town || '[Town]',
+  });
 
   return (
     <div className="space-y-6">

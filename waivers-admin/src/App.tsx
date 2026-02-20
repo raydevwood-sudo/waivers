@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/LoginPage';
-import WaiverListPage from './components/WaiverListPage';
+import AdminConsolePage from './components/AdminConsolePage';
 import Loader from './components/ui/Loader';
 import { ensureWaiverSettingsDocument } from './services/settings.service';
 
@@ -22,7 +22,7 @@ function AppContent() {
     return <Loader />;
   }
 
-  return user ? <WaiverListPage /> : <LoginPage />;
+  return user ? <AdminConsolePage /> : <LoginPage />;
 }
 
 function App() {

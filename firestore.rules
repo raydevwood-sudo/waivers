@@ -3,11 +3,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Waivers collection
-    match /waivers/{document=**} {
-      // Authenticated users can read all waivers (for admin portal)
+    match /waivers/{documentId} {
+      // Public READ access for templates and settings (needed by public waiver form)
+      allow read: if resource.data.docType == 'waiverTemplate' 
+                  || resource.data.docType == 'settings'
+                  || documentId == 'settings';
+      
+      // Authenticated users can read all waivers (for admin portal and paper waiver uploads)
       allow read: if request.auth != null;
+      
       // Authenticated users can write (for paper waiver uploads)
-      // Public writes go through Cloud Functions
+      // Public writes go through Cloud Functions with elevated privileges
       allow write: if request.auth != null;
     }
     
