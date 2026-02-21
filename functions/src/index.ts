@@ -154,8 +154,8 @@ export const submitWaiverSecure = onRequest(
       const appCheckToken = req.header("X-Firebase-AppCheck");
 
       // Verify App Check token (required for production security)
-      // Set REQUIRE_APP_CHECK=false to disable during development
-      const requireAppCheck = process.env.REQUIRE_APP_CHECK !== "false";
+      // Set REQUIRE_APP_CHECK=true to enable App Check enforcement
+      const requireAppCheck = process.env.REQUIRE_APP_CHECK === "true";
 
       if (requireAppCheck) {
         if (!appCheckToken) {
