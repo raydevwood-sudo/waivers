@@ -160,7 +160,7 @@ export default function SignatureCanvas({ onSave }: SignatureCanvasProps) {
                 ref={canvasRef} 
                 className="w-full touch-none bg-white cursor-crosshair"
                 style={{
-                  height: '300px'
+                  height: '250px'
                 }}
                 role="img"
                 aria-label="Signature drawing area - use mouse or touch to draw your signature"
@@ -173,7 +173,7 @@ export default function SignatureCanvas({ onSave }: SignatureCanvasProps) {
           </>
         ) : (
           <>
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6" style={{ minHeight: '300px' }}>
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6" style={{ minHeight: '250px' }}>
               <label htmlFor="typed-signature-input" className="block text-sm font-medium text-gray-700 mb-2">
                 Type your full name
               </label>

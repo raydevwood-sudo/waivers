@@ -38,8 +38,8 @@ export default function SignatureModal({ isOpen, onClose, onSave, signee }: Sign
       aria-modal="true"
       aria-labelledby="signature-modal-title"
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <h2 id="signature-modal-title" className="text-2xl font-semibold text-gray-900">
             {signee.charAt(0).toUpperCase() + signee.slice(1)} Signature
           </h2>
@@ -53,7 +53,7 @@ export default function SignatureModal({ isOpen, onClose, onSave, signee }: Sign
             </svg>
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6 flex-1 overflow-y-auto">
           <SignatureCanvas onSave={handleSave} signeeType={signee} />
         </div>
       </div>
