@@ -1,0 +1,18 @@
+{
+  "name": "waivers-scripts",
+  "version": "1.0.0",
+  "description": "Migration and setup scripts for waiver system",
+  "private": true,
+  "scripts": {
+    "migrate:expires-at": "ts-node migrate-add-expires-at.ts",
+    "setup:admin": "ts-node setup-admin.ts"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}

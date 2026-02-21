@@ -1,11 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getActiveTemplateCached, type WaiverTemplateRecord, type WaiverTemplateType } from '../services/template.service';
+import { isPassengerWaiverAppEnabled } from '../services/settings.service';
 
 type TemplateContextValue = {
   passengerTemplate: WaiverTemplateRecord | null;
   representativeTemplate: WaiverTemplateRecord | null;
   loading: boolean;
   error: string | null;
+  isAppEnabled: boolean;
   refetch: () => Promise<void>;
 };
 
@@ -16,24 +18,28 @@ export function TemplateProvider({ children }: { children: ReactNode }) {
   const [representativeTemplate, setRepresentativeTemplate] = useState<WaiverTemplateRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAppEnabled, setIsAppEnabled] = useState(true);
 
   const loadTemplates = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [passenger, representative] = await Promise.all([
+      const [passenger, representative, appEnabled] = await Promise.all([
         getActiveTemplateCached('passenger'),
         getActiveTemplateCached('representative'),
+        isPassengerWaiverAppEnabled(),
       ]);
 
       setPassengerTemplate(passenger);
       setRepresentativeTemplate(representative);
+      setIsAppEnabled(appEnabled);
       
-      if (!passenger) {
+      if (!appEnabled) {
+        setError('Waiver submissions are currently disabled. Please contact support.');
+      } else if (!passenger) {
         console.warn('No active passenger template found');
-      }
-      if (!representative) {
+      } else if (!representative) {
         console.warn('No active representative template found');
       }
     } catch (err) {
@@ -53,6 +59,7 @@ export function TemplateProvider({ children }: { children: ReactNode }) {
     representativeTemplate,
     loading,
     error,
+    isAppEnabled,
     refetch: loadTemplates,
   };
 

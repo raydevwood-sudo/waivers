@@ -47,12 +47,25 @@ export default function PaperWaiverUploadForm() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
+    const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
+    
+    if (file) {
+      // Check file type
+      if (file.type !== 'application/pdf') {
+        setError('Only PDF files are allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      // Check file size
+      if (file.size > MAX_UPLOAD_SIZE) {
+        setError(`PDF must be under 10MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please compress your PDF and try again.`);
+        e.target.value = '';
+        return;
+      }
+      
       setFormData((prev) => ({ ...prev, pdfFile: file }));
       setError(null);
-    } else {
-      setError('Please select a valid PDF file');
-      e.target.value = '';
     }
   };
 

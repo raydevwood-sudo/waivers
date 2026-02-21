@@ -51,7 +51,7 @@ function App() {
 }
 
 function AppContent() {
-  const { passengerTemplate, representativeTemplate } = useTemplates();
+  const { passengerTemplate, representativeTemplate, isAppEnabled, error: templateError } = useTemplates();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
   const [submissionData, setSubmissionData] = useState<WaiverSubmission | null>(null)
@@ -61,6 +61,11 @@ function AppContent() {
     setIsSubmitting(true)
     setSubmissionError(null)
     try {
+      // Check if the app is enabled
+      if (!isAppEnabled) {
+        throw new Error('Waiver submissions are currently disabled. Please contact support.');
+      }
+
       // Check if Firebase is configured
       if (!isFirebaseConfigured()) {
         throw new Error('Firebase is not properly configured. Please check your environment variables.');
@@ -108,6 +113,12 @@ function AppContent() {
         <SuccessPage submission={submissionData} />
       ) : (
         <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-4">
+          {!isAppEnabled && templateError && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center" role="alert">
+              <p className="text-lg font-semibold text-yellow-900 mb-2">Waiver Submissions Currently Unavailable</p>
+              <p className="text-sm text-yellow-800">{templateError}</p>
+            </div>
+          )}
           {submissionError && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4" role="alert" aria-live="assertive">
               <p className="text-sm font-semibold text-red-800">Submission failed</p>
@@ -125,7 +136,7 @@ function AppContent() {
               </p>
             </div>
           )}
-          <WaiverForm onSubmit={handleSubmit} />
+          {isAppEnabled && <WaiverForm onSubmit={handleSubmit} />}
         </div>
       )}
     </Layout>

@@ -2,6 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email in [
+               'raydevwood@gmail.com',
+               'raymond.wood@cyclingwithoutagesociety.org'
+             ];
+    }
+    
     // Waivers collection
     match /waivers/{documentId} {
       // Public READ access for templates and settings (needed by public waiver form)
@@ -12,9 +21,33 @@ service cloud.firestore {
       // Authenticated users can read all waivers (for admin portal and paper waiver uploads)
       allow read: if request.auth != null;
       
-      // Authenticated users can write (for paper waiver uploads)
-      // Public writes go through Cloud Functions with elevated privileges
-      allow write: if request.auth != null;
+      // Only allow CREATE for authenticated users (paper waiver uploads)
+      // Must set uploadedBy field matching the authenticated user
+      allow create: if request.auth != null && 
+                    (
+                      // Paper uploads must set uploadedBy matching auth user
+                      (request.resource.data.source == 'paper-upload' && 
+                       request.resource.data.uploadedById == request.auth.uid) ||
+                      // Allow creates without uploadedBy for backward compatibility
+                      // (though Cloud Functions should be used instead)
+                      !request.resource.data.keys().hasAny(['uploadedBy', 'uploadedById'])
+                    );
+      
+      // Only Cloud Functions can update/delete waivers (no direct client writes)
+      allow update, delete: if false;
+    }
+    
+    // Settings document - restrict writes to admins only
+    match /waivers/settings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Template documents - restrict to admins only
+    match /waivers/{templateId} {
+      allow read: if resource.data.docType == 'waiverTemplate';
+      allow write: if isAdmin() && 
+                   request.resource.data.docType == 'waiverTemplate';
     }
     
     // Deny all other collections

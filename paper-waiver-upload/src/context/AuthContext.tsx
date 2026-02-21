@@ -8,10 +8,12 @@ import {
   type User,
 } from 'firebase/auth';
 import app from '../config/firebase';
+import { isPaperWaiverUploadEnabled } from '../services/settings.service';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAppEnabled: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -21,11 +23,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAppEnabled, setIsAppEnabled] = useState(true);
   const auth = getAuth(app);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      
+      // Check if the app is enabled
+      if (user) {
+        const enabled = await isPaperWaiverUploadEnabled();
+        setIsAppEnabled(enabled);
+      }
+      
       setLoading(false);
     });
 
@@ -52,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, isAppEnabled, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -62,7 +62,7 @@ function getDefaultSettingsDocument(): WaiverSettingsDocument {
     schemaVersion: 4,
     solutionSettings: {
       organizationName: 'Cycling Without Age Society',
-      supportEmail: 'raydevwood@gmail.com',
+      supportEmail: import.meta.env.VITE_DEFAULT_SUPPORT_EMAIL || 'support@sidneycwas.ca',
       enablePaperWaiverUpload: true,
       enablePassengerWaiverApp: true,
     },

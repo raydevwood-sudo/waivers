@@ -98,6 +98,7 @@ export async function uploadPaperWaiver(
       witnessName: formData.witnessName,
       mediaRelease: formData.mediaRelease,
       submittedAt: Timestamp.fromDate(signedDate),
+      expiresAt: Timestamp.fromDate(expiryDate),
       
       // Agreement flags (set all to true for paper waivers)
       informedConsent1: true,
